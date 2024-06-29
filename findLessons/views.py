@@ -10,10 +10,6 @@ def homepage(request):
     return render(request, template_name='homepage.html', context=ctx)
 
 
-def profile(request):
-    return render(request, template_name='profile.html')
-
-
 class UserCreateView(CreateView):
     form_class = CreateUserForm
     template_name = 'user_create.html'

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'reservation',
+    'user_profile',
 ]
 
 MIDDLEWARE = [
@@ -127,7 +128,11 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-CRISPY_TEMPLATE_PACK = "bootstrap4"
-LOGIN_REDIRECT_URL = "/?login=ok"
-LOGIN_URL = "/login/?auth=notok"
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = '/?login=ok'
+LOGIN_URL = '/login/?auth=notok'
+
+LOGOUT_REDIRECT_URL = '/?logout=ok'
+LOGOUT_URL = '/logout/?auth=notok'
