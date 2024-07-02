@@ -69,13 +69,7 @@
 {% endblock %}
 
 {% block content %} 
-
-    {% if "notok" in request.GET.auth %}
-    <div class="alert alert-danger" role="alert">
-      You do not have the necessary permissions for the chosen service!
-    </div>
-    {% endif %}
-        
+    
     <div class="container">
         <form method="post"> {% csrf_token %}
             {{form | crispy}}

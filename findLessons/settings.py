@@ -136,3 +136,6 @@ LOGIN_URL = '/login/?auth=notok'
 
 LOGOUT_REDIRECT_URL = '/?logout=ok'
 LOGOUT_URL = '/logout/?auth=notok'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

@@ -16,9 +16,10 @@ Including another URLconf
 """
 
 from django.urls import path
-from .views import profile
+from .views import *
 
 app_name = 'user_profile'
 urlpatterns = [
-    path('', profile, name='profile'),
+    path('', profile_home, name='profile'),
+    path('update/', ProfileUpdateView.as_view(), name='update_profile'),
 ]

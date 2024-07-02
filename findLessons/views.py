@@ -3,11 +3,16 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 from findLessons.forms import CreateUserForm
+from user_profile.models import Profile
 
 
 def homepage(request):
-    ctx = {'title': 'findLessons'}
-    return render(request, template_name='homepage.html', context=ctx)
+    if request.user.is_authenticated:
+        profile = Profile.objects.get(user=request.user)
+    else:
+        profile = None
+
+    return render(request, template_name='homepage.html', context={'title': 'findLessons', 'profile': profile})
 
 
 class UserCreateView(CreateView):
