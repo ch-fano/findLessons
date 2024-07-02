@@ -1,0 +1,30 @@
+{% extends 'user_profile/profile.html' %}
+
+{% block info %}
+    <p> Teacher </p>
+    <div class="list">
+        <ul>
+            <li>City: {{ teacher.city }}</li>
+            <li>Subjects: {{ teacher.subjects }}</li>
+            <li>Price: {{ teacher.price }}€</li>
+            <li>Stars: {{ teacher.stars }}/5</li>
+        </ul>
+        <div class="button-container">
+            <form id="teacher-form" method="post" action="{% url 'user_profile:update_teacher' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">Edit teacher information</button>
+            </form>
+
+            <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">Set new availability</button>
+            </form>
+
+            <form id="availability-form" method="post" action="{% url 'reservation:availability_list' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">Set new availability</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

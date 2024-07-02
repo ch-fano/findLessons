@@ -16,9 +16,13 @@ Including another URLconf
 """
 
 from django.urls import path
-from .views import reservation_home
+from .views import *
 
 app_name = 'reservation'
+
 urlpatterns = [
     path('', reservation_home, name='home'),
+    path('availability/<int:teacher>/', get_availability, name='availability_list'),
+    path('availability/create/', CreateAvailabilityView.as_view(), name='availability_create'),
+    path('search/', search, name='search'),
 ]

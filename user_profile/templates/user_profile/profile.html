@@ -63,20 +63,31 @@
         .button:hover {
             background-color: #0056b3;
         }
-        .example-list {
+        .list {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding-left: 20px;
+            flex-direction: column; /* Add this line to stack items vertically */
         }
-        .example-list ul {
+        .list ul {
             list-style-type: none;
             padding: 0;
+            margin: 0; /* Remove default margin */
         }
-        .example-list li {
+        .list li {
             margin: 10px 0;
             font-size: 1.2em;
+        }
+        .button-container {
+            margin-top: 20px; /* Add some space between the list and the button */
+            text-align: center; /* Center the button */
+        }
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
         }
     </style>
 {% endblock %}
@@ -100,13 +111,6 @@
                 </form>
             </div>
         </div>
-        <div class="example-list">
-            <ul>
-                <li>Example Item 1</li>
-                <li>Example Item 2</li>
-                <li>Example Item 3</li>
-                <li>Example Item 4</li>
-            </ul>
-        </div>
+        {% block info %}{% endblock %}
     </div>
 {% endblock %}

@@ -9,8 +9,6 @@ from user_profile.models import Profile
 def homepage(request):
     if request.user.is_authenticated:
         profile = Profile.objects.get(user=request.user)
-    else:
-        profile = None
 
     return render(request, template_name='homepage.html', context={'title': 'findLessons', 'profile': profile})
 

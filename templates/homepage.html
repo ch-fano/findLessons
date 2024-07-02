@@ -18,7 +18,11 @@
         {% endif %}
     </div>
     
-    <h1>
-            Ciao a tutti, benvenuti!
-    </h1>
+    <h1> Find the teacher who's right for you </h1>
+    <form action="{% url 'reservation:search' %}" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+    <input type="submit" value="Search"> </form>
+    
+    {% block results %}{% endblock %}
 {% endblock %}
