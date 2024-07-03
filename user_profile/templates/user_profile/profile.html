@@ -3,30 +3,35 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block head%}
+
+    {{ block.super }}
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 60px 0 0;
             font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
             background-color: #f0f0f0;
         }
         .container {
             display: flex;
-            flex: 1;
+            width: 100%; /* Make the container full width */
             padding: 20px;
+            gap: 20px; /* Add space between the profile section and the list */
+            box-sizing: border-box;
+            height: calc(100vh - 60px); /* Adjust height to fill the remaining viewport */
+        }
+        .profile-section, .list {
+            flex: 1; /* Make both sections flexible and equal */
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .profile-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 40%;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .profile-image {
             width: 250px;
@@ -64,25 +69,23 @@
             background-color: #0056b3;
         }
         .list {
-            flex: 1;
             display: flex;
+            flex-direction: column; /* Stack items vertically */
             align-items: center;
             justify-content: center;
-            padding-left: 20px;
-            flex-direction: column; /* Add this line to stack items vertically */
         }
         .list ul {
             list-style-type: none;
             padding: 0;
-            margin: 0; /* Remove default margin */
+            margin: 0;
         }
         .list li {
             margin: 10px 0;
             font-size: 1.2em;
         }
         .button-container {
-            margin-top: 20px; /* Add some space between the list and the button */
-            text-align: center; /* Center the button */
+            margin-top: 20px;
+            text-align: center;
         }
         .button-container button {
             padding: 10px 20px;

@@ -21,3 +21,8 @@ class AvailabilityForm(forms.ModelForm):
                 }
             ),
         }
+
+
+class SearchForm(forms.Form):
+    subject = forms.CharField(label='Subject', max_length=100, required=True)
+    city = forms.CharField(label='City', max_length=100, required=True)

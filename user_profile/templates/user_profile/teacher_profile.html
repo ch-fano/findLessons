@@ -1,7 +1,6 @@
 {% extends 'user_profile/profile.html' %}
 
 {% block info %}
-    <p> Teacher </p>
     <div class="list">
         <ul>
             <li>City: {{ teacher.city }}</li>
@@ -20,9 +19,9 @@
                     <button type="submit" class="btn btn-info">Set new availability</button>
             </form>
 
-            <form id="availability-form" method="post" action="{% url 'reservation:availability_list' %}">
+            <form id="availability-list-form" method="post" action="{% url 'reservation:availability_list' teacher.teacher_id %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-info">Set new availability</button>
+                    <button type="submit" class="btn btn-info">View availability</button>
             </form>
         </div>
     </div>

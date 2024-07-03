@@ -21,8 +21,8 @@ from .views import *
 app_name = 'reservation'
 
 urlpatterns = [
-    path('', reservation_home, name='home'),
+    path('', get_reservation_home, name='reservation_home'),
+    path('search/<str:subject>/<str:city>/', SearchList.as_view(), name='search'),
     path('availability/<int:teacher>/', get_availability, name='availability_list'),
     path('availability/create/', CreateAvailabilityView.as_view(), name='availability_create'),
-    path('search/', search, name='search'),
 ]

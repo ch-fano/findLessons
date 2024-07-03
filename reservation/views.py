@@ -2,7 +2,7 @@ from datetime import datetime
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 from braces.views import GroupRequiredMixin
 
 from reservation.forms import AvailabilityForm
@@ -12,9 +12,20 @@ from user_profile.models import Profile, Teacher
 
 # Create your views here.
 
+def get_reservation_home(request):
+    ctx = {'title': 'Reservation', 'object_list': Teacher.objects.all()}
+    return render(request, template_name='reservation/reservation_home.html', context=ctx)
 
-def reservation_home(request):
-    return render(request, 'reservation/home.html')
+
+class SearchList(ListView):
+    model = Teacher
+    template_name = 'reservation/reservation_home.html'
+
+    def get_queryset(self):
+        subject = self.request.resolver_match.kwargs['subject']
+        city = self.request.resolver_match.kwargs['city']
+
+        return Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
 
 
 def get_availability(request, teacher):
