@@ -31,9 +31,9 @@ class Profile(models.Model):
 
 
 class Teacher(models.Model):
-    teacher = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    subjects = models.TextField()
-    city = models.TextField()
+    teacher = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    subjects = models.CharField(max_length=100)
+    city = models.CharField(max_length=30)
     price = models.IntegerField(null=True,validators=[
             MinValueValidator(0, message=_('Value must be greater than or equal to 0'))])
     stars = models.FloatField(default=0, validators=[

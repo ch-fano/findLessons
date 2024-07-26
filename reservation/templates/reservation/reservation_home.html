@@ -1,11 +1,31 @@
 {% extends 'base.html' %}
 
-{% block title %} {{title}} {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 
 {% block content %}
+
+    <form method="post" action="{% url 'reservation:filter' subject city %}">
+        {% csrf_token %}
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+
+        <label for="order">Order by:</label>
+        <select id="order" name="order">
+            <option value="price" {% if order_by == 'price' %}selected{% endif %}>Price</option>
+            <option value="stars" {% if order_by == 'stars' %}selected{% endif %}>Stars</option>
+        </select>
+
+        <button type="submit">Submit</button>
+    </form>
+
     {% for t in object_list %}
         <ul>
-            {{ t }}
+            <li>{{ t }}</li>
         </ul>
     {% endfor %}
 {% endblock %}
+
+

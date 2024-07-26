@@ -8,6 +8,7 @@ from user_profile.models import Profile
 
 
 def homepage(request):
+
     ctx = {'title': 'findLessons'}
 
     if request.user.is_authenticated:

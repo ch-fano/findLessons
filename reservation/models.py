@@ -20,12 +20,11 @@ class Lesson(models.Model):
 
 
 class Availability(models.Model):
-    teacher = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    available = models.BooleanField(default=True)
+    teacher = models.ManyToManyField(Profile)
     date = models.DateTimeField()
 
     def __str__(self):
-        return  str(self.date.date()) + ' at ' + str(self.date.time())
+        return str(self.date.date()) + ' at ' + str(self.date.time())
 
 
 class Rating(models.Model):

@@ -5,7 +5,7 @@ from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from braces.views import GroupRequiredMixin
 
-from user_profile.forms import ProfileForm
+from user_profile.forms import ProfileForm, TeacherForm
 from user_profile.models import Profile, Teacher
 
 
@@ -43,13 +43,12 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class TeacherUpdateView(GroupRequiredMixin, UpdateView):
-    group_required = ["Teachers"]
+    group_required = ['Teachers']
     model = Teacher
     title = 'Update Teacher'
-    # form_class = TeacherForm
-    template_name = 'user_profile/teacher_update.html'
+    form_class = TeacherForm
+    template_name = 'user_profile/profile_update.html'
     success_url = reverse_lazy('user_profile:profile')
-    fields = ['city', 'subjects', 'price']
 
     def get_object(self, queryset=None):
         profile = get_object_or_404(Profile, user=self.request.user)

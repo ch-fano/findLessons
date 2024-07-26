@@ -1,5 +1,5 @@
 from django import forms
-from tempus_dominus.widgets import DateTimePicker
+from tempus_dominus.widgets import DateTimePicker, DatePicker
 from .models import Availability
 
 

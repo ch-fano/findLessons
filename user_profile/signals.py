@@ -10,12 +10,17 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-        if instance.groups.filter(name='Teachers').exists():
-            t = Teacher()
-            t.teacher = instance.profile
-            t.save()
-
 
 @receiver(post_save, sender=User)
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+    if hasattr(instance.profile, 'teacher'):
+        instance.profile.teacher.save()
+
+    elif instance.groups.filter(name='Teachers').exists():
+        # if the entry in the teacher table doesn't exist but the user has group teacher, create the entry
+
+        t = Teacher()
+        t.teacher = instance.profile
+        t.save()
