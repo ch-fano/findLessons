@@ -74,6 +74,37 @@
 </head>
 
 <body>
+
+    {% with first_name_length=user.profile.first_name|length %}
+        {% if user.is_authenticated and request.GET.login == "ok" and first_name_length == 0 %}
+            <div id="info" class="modal fade" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Welcome {{user.username}} </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  <p> Edit your profile information to start </p>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-info" 
+                          onclick="window.location.href='{% url 'user_profile:update_profile' %}'">Complete profile</button>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <script>
+          $(document).ready(function(){
+              $("#info").modal('show');
+          });
+        </script>            
+        {% endif %}
+    {% endwith %}
+    
     <div class="header">
     
         <div class="title">
