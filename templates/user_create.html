@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% load crispy_forms_filters %}
+{% load static %}
+
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
 {% block title %} Create a new user {% endblock %}
@@ -24,6 +26,19 @@
             border-radius: 8px;
             background-color: #ffffff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .full-page-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 70px;
+            background-color: #ffffff;
+        }
+        .full-page-container h1 {
+            margin-bottom: 20px;
         }
         form {
             display: flex;
@@ -68,11 +83,18 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <form method="post"> 
-            {% csrf_token %}
-            {{ form | crispy }}
-            <input type="submit" class="btn-custom btn-success" value="Sign up">
-        </form>
-    </div>
+    {% if user.is_authenticated %}
+        <div class="full-page-container">
+            <h1> Log out before a new registration !!!</h1> 
+            <img src="{% static 'imgs/access_denied.png' %}" alt="Access Denied Image">
+        </div>
+    {% else %}
+        <div class="container">
+            <form method="post"> 
+                {% csrf_token %}
+                {{ form | crispy }}
+                <input type="submit" class="btn-custom btn-success" value="Sign up">
+            </form>
+        </div>
+    {% endif %}
 {% endblock %}
