@@ -9,7 +9,7 @@
             <li>Stars: {{ teacher.stars }}/5</li>
         </ul>
         <div class="button-container">
-            <form id="teacher-form" method="post" action="{% url 'set-teacher' %}">
+            <form id="teacher-form" method="post" action="{% url 'user_profile:set-teacher' %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-info">Edit teacher information</button>
             </form>

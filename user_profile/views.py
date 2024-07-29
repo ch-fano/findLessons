@@ -50,7 +50,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
             # if not edited go to the teacher form
             if len(self.request.user.profile.teacher.city) == 0:
-                return reverse_lazy('set-teacher')
+                return reverse_lazy('user_profile:set-teacher')
 
         return reverse_lazy('user_profile:profile')
 
