@@ -157,9 +157,7 @@
                 <div id="profile-details">
                     <p>{{ profile.first_name }} {{ profile.last_name }}</p>
                     <p>{{ profile.email }}</p>
-                    {% if profile.tel_number %}
-                        <p>{{ profile.tel_number }}</p>
-                    {% endif %}
+                    <p>{{ profile.tel_number }}</p>
                 </div>
                 <form id="edit-form" method="post" action="{% url 'user_profile:profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}

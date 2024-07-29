@@ -13,7 +13,7 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField()
-    tel_number = models.CharField(max_length=10, blank=True, null=True)
+    tel_number = models.CharField(max_length=10, blank=True, default='')
     picture = models.ImageField(default='default_profile.jpg', upload_to='profile_imgs')
 
     def save(self, *args, **kwargs):
