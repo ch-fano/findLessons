@@ -2,8 +2,7 @@
 
 {% block title %} {{ title }} {% endblock %}
 
-{% block head%}
-
+{% block head %}
     {{ block.super }}
     <style>
         body {
@@ -14,14 +13,14 @@
         }
         .container {
             display: flex;
-            width: 100%; /* Make the container full width */
+            width: 100%;
             padding: 20px;
-            gap: 20px; /* Add space between the profile section and the list */
+            gap: 20px;
             box-sizing: border-box;
-            height: calc(100vh - 60px); /* Adjust height to fill the remaining viewport */
+            height: calc(100vh - 60px);
         }
         .profile-section, .list {
-            flex: 1; /* Make both sections flexible and equal */
+            flex: 1;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
@@ -32,6 +31,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         .profile-image {
             width: 250px;
@@ -42,11 +42,24 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
+            position: relative;
+            transition: width 0.3s, height 0.3s;
         }
         .profile-image img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
+        }
+        .edit-photo {
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .profile-info {
             text-align: center;
@@ -54,23 +67,30 @@
         .profile-info p {
             margin: 10px 0;
             font-size: 1.2em;
+            transition: font-size 0.3s;
         }
-        .button {
+        .btn {
             margin-top: 10px;
             padding: 10px 20px;
             font-size: 1em;
             color: #fff;
-            background-color: #007bff;
+            background-color: #4CAF50;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        .button:hover {
-            background-color: #0056b3;
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
         }
         .list {
             display: flex;
-            flex-direction: column; /* Stack items vertically */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
@@ -84,36 +104,144 @@
             font-size: 1.2em;
         }
         .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
             margin-top: 20px;
-            text-align: center;
         }
-        .button-container button {
-            padding: 10px 20px;
+        #edit-form {
+            display: none;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        #file-input {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        /* Reduced size when editing */
+        .profile-section.edit-mode .profile-image {
+            width: 150px;
+            height: 150px;
+        }
+        .profile-section.edit-mode .profile-info p {
             font-size: 1em;
-            cursor: pointer;
         }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <div class="profile-section">
-            <div class="profile-image">
-                <img src="{{ profile.picture.url }}" alt="Profile Image">
+        <div class="profile-section" id="profile-section">
+            <div class="profile-image" id="profile-image">
+                <img id="profile-pic" src="{{ profile.picture.url }}" alt="Profile Image">
+                <div class="edit-photo" id="edit-photo-button" onclick="triggerFileInput()">Edit ✏️</div>
             </div>
-            <div class="profile-info">
-                <p>{{ profile.first_name }} {{ profile.last_name }}</p>
-                <p>{{ profile.email }}</p>
-                <form id="update-form" method="post" action="{% url 'user_profile:update_profile' %}">
+            <div class="profile-info" id="profile-info">
+                <div id="profile-details">
+                    <p>{{ profile.first_name }} {{ profile.last_name }}</p>
+                    <p>{{ profile.email }}</p>
+                    {% if profile.tel_number %}
+                        <p>{{ profile.tel_number }}</p>
+                    {% endif %}
+                </div>
+                <form id="edit-form" method="post" action="{% url 'user_profile:profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-info">Edit</button>
+                    <input type="file" id="file-input" name="picture" accept="image/*" onchange="previewImage(event)">
+
+                    <div class="form-group">
+                        <label for="first_name">First Name:</label>
+                        <input type="text" name="first_name" id="first_name" value="{{ profile.first_name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name:</label>
+                        <input type="text" name="last_name" id="last_name" value="{{ profile.last_name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" name="email" id="email" value="{{ profile.email }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tel_number">Telephone number:</label>
+                        <input type="tel" name="tel_number" id="tel_number" value="{{ profile.tel_number|default:'' }}" pattern="[0-9]*">
+                    </div>
+
+                    <div class="button-container" id="confirm-container" style="display:none;">
+                        <button type="submit" class="btn btn-info">Confirm</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Back</button>
+                    </div>
                 </form>
-                <form id="logout-form" method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info">Logout</button>
-                </form>
+                <div class="button-row">
+                    <button id="edit-button" class="btn btn-info" onclick="showEditForm()">Edit</button>
+                    <form id="logout-form" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-info" id="logout-button">Logout</button>
+                    </form>
+                </div>
             </div>
         </div>
         {% block info %}{% endblock %}
     </div>
+    <script>
+        function showEditForm() {
+            document.getElementById('edit-form').style.display = 'block';
+            document.getElementById('profile-details').style.display = 'none';
+            document.getElementById('edit-button').style.display = 'none';
+            document.getElementById('confirm-container').style.display = 'flex';
+            document.getElementById('logout-button').style.display = 'none';
+            document.getElementById('edit-photo-button').style.display = 'block';
+            document.getElementById('profile-section').classList.add('edit-mode');
+        }
+
+        function hideEditForm() {
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('profile-details').style.display = 'block';
+            document.getElementById('edit-button').style.display = 'block';
+            document.getElementById('confirm-container').style.display = 'none';
+            document.getElementById('logout-button').style.display = 'block';
+            document.getElementById('edit-photo-button').style.display = 'none';
+            document.getElementById('profile-section').classList.remove('edit-mode');
+
+            // Reset the form values to the original profile values
+            document.getElementById('first_name').value = '{{ profile.first_name }}';
+            document.getElementById('last_name').value = '{{ profile.last_name }}';
+            document.getElementById('email').value = '{{ profile.email }}';
+            document.getElementById('tel_number').value = '{{ profile.tel_number }}';
+            // Reset the profile picture preview
+            document.getElementById('profile-pic').src = '{{ profile.picture.url }}';
+            // Clear the file input
+            document.getElementById('file-input').value = '';
+        }
+
+        function triggerFileInput() {
+            document.getElementById('file-input').click();
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('profile-pic').src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 {% endblock %}

@@ -28,6 +28,14 @@ def profile_home(request):
     else:
         template = 'user_profile/student_profile.html'
 
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+
+            profile.refresh_from_db()
+            ctx['profile'] = profile
+
     return render(request, template_name=template, context=ctx)
 
 
@@ -42,7 +50,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
             # if not edited go to the teacher form
             if len(self.request.user.profile.teacher.city) == 0:
-                return reverse_lazy('user_profile:update_teacher')
+                return reverse_lazy('set-teacher')
 
         return reverse_lazy('user_profile:profile')
 

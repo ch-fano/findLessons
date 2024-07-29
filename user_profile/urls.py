@@ -21,6 +21,7 @@ from .views import *
 app_name = 'user_profile'
 urlpatterns = [
     path('', profile_home, name='profile'),
-    path('update/', ProfileUpdateView.as_view(), name='update_profile'),
-    path('teacher/', TeacherUpdateView.as_view(), name='update_teacher'),
+    path('set/', ProfileUpdateView.as_view(), name='set-profile'),
+    path('teacher/', TeacherUpdateView.as_view(), name='set-teacher'),
 ]
+
