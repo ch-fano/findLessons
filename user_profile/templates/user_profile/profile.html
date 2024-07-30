@@ -5,6 +5,7 @@
 {% block head %}
     {{ block.super }}
     <style>
+        /* Style remains the same */
         body {
             margin: 0;
             padding: 60px 0 0;
@@ -109,7 +110,7 @@
             justify-content: center;
             margin-top: 20px;
         }
-        #edit-form {
+        #edit-profile-form {
             display: none;
         }
         .button-row {
@@ -159,7 +160,7 @@
                     <p>{{ profile.email }}</p>
                     <p>{{ profile.tel_number }}</p>
                 </div>
-                <form id="edit-form" method="post" action="{% url 'user_profile:profile' %}" enctype="multipart/form-data">
+                <form id="edit-profile-form" method="post" action="{% url 'user_profile:profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="file" id="file-input" name="picture" accept="image/*" onchange="previewImage(event)">
 
@@ -183,13 +184,13 @@
                         <input type="tel" name="tel_number" id="tel_number" value="{{ profile.tel_number|default:'' }}" pattern="[0-9]*">
                     </div>
 
-                    <div class="button-container" id="confirm-container" style="display:none;">
-                        <button type="submit" class="btn btn-info">Confirm</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Back</button>
+                    <div class="button-container" id="confirm-profile-container" style="display:none;">
+                        <button type="submit" class="btn btn-info">Save changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideEditProfileForm()">Cancel</button>
                     </div>
                 </form>
                 <div class="button-row">
-                    <button id="edit-button" class="btn btn-info" onclick="showEditForm()">Edit</button>
+                    <button id="edit-profile-button" class="btn btn-info" onclick="showEditProfileForm()">Edit</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-info" id="logout-button">Logout</button>
@@ -199,22 +200,23 @@
         </div>
         {% block info %}{% endblock %}
     </div>
+        {% block js %}{% endblock %}
     <script>
-        function showEditForm() {
-            document.getElementById('edit-form').style.display = 'block';
+        function showEditProfileForm() {
+            document.getElementById('edit-profile-form').style.display = 'block';
             document.getElementById('profile-details').style.display = 'none';
-            document.getElementById('edit-button').style.display = 'none';
-            document.getElementById('confirm-container').style.display = 'flex';
+            document.getElementById('edit-profile-button').style.display = 'none';
+            document.getElementById('confirm-profile-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
             document.getElementById('edit-photo-button').style.display = 'block';
             document.getElementById('profile-section').classList.add('edit-mode');
         }
 
-        function hideEditForm() {
-            document.getElementById('edit-form').style.display = 'none';
+        function hideEditProfileForm() {
+            document.getElementById('edit-profile-form').style.display = 'none';
             document.getElementById('profile-details').style.display = 'block';
-            document.getElementById('edit-button').style.display = 'block';
-            document.getElementById('confirm-container').style.display = 'none';
+            document.getElementById('edit-profile-button').style.display = 'block';
+            document.getElementById('confirm-profile-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
             document.getElementById('edit-photo-button').style.display = 'none';
             document.getElementById('profile-section').classList.remove('edit-mode');

@@ -2,28 +2,72 @@
 
 {% block info %}
     <div class="list">
-        <ul>
-            <li>City: {{ teacher.city }}</li>
-            <li>Subjects: {{ teacher.subjects }}</li>
-            <li>Price: {{ teacher.price }}€</li>
+        <ul id="teacher-details">
+            <li>City: <span id="city-display">{{ teacher.city }}</span></li>
+            <li>Subjects: <span id="subjects-display">{{ teacher.subjects }}</span></li>
+            <li>Price: <span id="price-display">{{ teacher.price }}€</span></li>
             <li>Stars: {{ teacher.stars }}/5</li>
         </ul>
-        <div class="button-container">
-            <form id="teacher-form" method="post" action="{% url 'user_profile:set-teacher' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info">Edit teacher information</button>
-            </form>
-
-            <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info">Set new availability</button>
-            </form>
-
+        <div class="button-container" id="teacher-button-container">
+            <button id="edit-teacher-button" class="btn btn-info" onclick="showTeacherForm()">Edit teacher information</button>
             <form id="availability-list-form" method="post" action="{% url 'reservation:availability_list' teacher.teacher_id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info">View availability</button>
+                {% csrf_token %}
+                <button type="submit" class="btn btn-info">View availability</button>
             </form>
         </div>
-    </div>
 
+        <!-- Edit Form -->
+        <form id="edit-teacher-form" method="post" action="{% url 'user_profile:set-teacher' %}" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="teacher-city">City:</label>
+                <input type="text" name="city" id="teacher-city" value="{{ teacher.city }}" required>
+            </div>
+            <div class="form-group">
+                <label for="teacher-subjects">Subjects:</label>
+                <input type="text" name="subjects" id="teacher-subjects" value="{{ teacher.subjects }}" required>
+            </div>
+            <div class="form-group">
+                <label for="teacher-price">Price:</label>
+                <input type="number" name="price" id="teacher-price" value="{{ teacher.price }}" step="1" required>
+            </div>
+            <div class="button-container" id="confirm-teacher-container" style="display:none;">
+                <button type="submit" class="btn btn-info">Save changes</button>
+                <button type="button" class="btn btn-secondary" onclick="hideTeacherForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        function showTeacherForm() {
+            document.getElementById('edit-teacher-form').style.display = 'block';
+            document.getElementById('teacher-details').style.display = 'none';
+            document.getElementById('edit-teacher-button').style.display = 'none';
+            document.getElementById('teacher-button-container').style.display = 'none';
+            document.getElementById('confirm-teacher-container').style.display = 'flex';
+        }
+
+        function hideTeacherForm() {
+            document.getElementById('edit-teacher-form').style.display = 'none';
+            document.getElementById('teacher-details').style.display = 'block';
+            document.getElementById('edit-teacher-button').style.display = 'block';
+            document.getElementById('teacher-button-container').style.display = 'flex';
+            document.getElementById('confirm-teacher-container').style.display = 'none';
+
+            // Reset the form values to the original profile values
+            document.getElementById('teacher-city').value = '{{ teacher.city }}';
+            document.getElementById('teacher-subjects').value = '{{ teacher.subjects }}';
+            document.getElementById('teacher-price').value = '{{ teacher.price }}';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('edit-teacher-button').addEventListener('click', showTeacherForm);
+            document.querySelectorAll('.btn-secondary').forEach(button => {
+                button.addEventListener('click', hideTeacherForm);
+            });
+        });
+    </script>
 {% endblock %}
