@@ -146,7 +146,6 @@
         }
     </style>
 {% endblock %}
-
 {% block content %}
     <div class="container">
         <div class="profile-section" id="profile-section">
@@ -183,43 +182,54 @@
                         <label for="tel_number">Telephone number:</label>
                         <input type="tel" name="tel_number" id="tel_number" value="{{ profile.tel_number|default:'' }}" pattern="[0-9]*">
                     </div>
-
-                    <div class="button-container" id="confirm-profile-container" style="display:none;">
-                        <button type="submit" class="btn btn-info">Save changes</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideEditProfileForm()">Cancel</button>
-                    </div>
                 </form>
-                <div class="button-row">
-                    <button id="edit-profile-button" class="btn btn-info" onclick="showEditProfileForm()">Edit</button>
+                <div class="button-row" id="edit-buttons">
+                    <button id="edit-button" class="btn btn-info" onclick="showEditForms()">Edit</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-info" id="logout-button">Logout</button>
                     </form>
                 </div>
+                <div class="button-container" id="confirm-container" style="display:none;">
+                    <button class="btn btn-info" onclick="submitForms()">Save changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideEditForms()">Cancel</button>
+                </div>
             </div>
         </div>
         {% block info %}{% endblock %}
     </div>
-        {% block js %}{% endblock %}
+    {% block js %}{% endblock %}
     <script>
-        function showEditProfileForm() {
+        function showEditForms() {
             document.getElementById('edit-profile-form').style.display = 'block';
             document.getElementById('profile-details').style.display = 'none';
-            document.getElementById('edit-profile-button').style.display = 'none';
-            document.getElementById('confirm-profile-container').style.display = 'flex';
+            document.getElementById('edit-button').style.display = 'none';
+            document.getElementById('confirm-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
             document.getElementById('edit-photo-button').style.display = 'block';
             document.getElementById('profile-section').classList.add('edit-mode');
+
+            if (document.getElementById('edit-teacher-form')) {
+                document.getElementById('edit-teacher-form').style.display = 'block';
+                document.getElementById('teacher-details').style.display = 'none';
+                document.getElementById('teacher-button-container').style.display = 'none';
+            }
         }
 
-        function hideEditProfileForm() {
+        function hideEditForms() {
             document.getElementById('edit-profile-form').style.display = 'none';
             document.getElementById('profile-details').style.display = 'block';
-            document.getElementById('edit-profile-button').style.display = 'block';
-            document.getElementById('confirm-profile-container').style.display = 'none';
+            document.getElementById('edit-button').style.display = 'block';
+            document.getElementById('confirm-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
             document.getElementById('edit-photo-button').style.display = 'none';
             document.getElementById('profile-section').classList.remove('edit-mode');
+
+            if (document.getElementById('edit-teacher-form')) {
+                document.getElementById('edit-teacher-form').style.display = 'none';
+                document.getElementById('teacher-details').style.display = 'block';
+                document.getElementById('teacher-button-container').style.display = 'flex';
+            }
 
             // Reset the form values to the original profile values
             document.getElementById('first_name').value = '{{ profile.first_name }}';
@@ -230,7 +240,44 @@
             document.getElementById('profile-pic').src = '{{ profile.picture.url }}';
             // Clear the file input
             document.getElementById('file-input').value = '';
+
+            // Reset the teacher form values to the original teacher values if present
+            if (document.getElementById('edit-teacher-form')) {
+                document.getElementById('teacher-city').value = '{{ teacher.city }}';
+                document.getElementById('teacher-subjects').value = '{{ teacher.subjects }}';
+                document.getElementById('teacher-price').value = '{{ teacher.price }}';
+            }
         }
+
+       function submitForms() {
+            // Create a new form element
+            let combinedForm = document.createElement('form');
+            combinedForm.method = 'post';
+            combinedForm.action = "{% url 'user_profile:profile' %}";  // Set the appropriate action URL
+            combinedForm.enctype = 'multipart/form-data';
+
+            // Add CSRF token
+            let csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').cloneNode();
+            combinedForm.appendChild(csrfToken);
+
+            // Append all input elements from the profile form
+            let profileFormInputs = document.querySelectorAll('#edit-profile-form input');
+            profileFormInputs.forEach(function(input) {
+                let clonedInput = input.cloneNode();
+                combinedForm.appendChild(clonedInput);
+            });
+
+            // Append all input elements from the teacher form if it exists
+            let teacherFormInputs = document.querySelectorAll('#edit-teacher-form input');
+            teacherFormInputs.forEach(function(input) {
+                let clonedInput = input.cloneNode();
+                combinedForm.appendChild(clonedInput);
+            });
+
+            // Append the new combined form to the body and submit it
+            document.body.appendChild(combinedForm);
+            combinedForm.submit();
+       }
 
         function triggerFileInput() {
             document.getElementById('file-input').click();

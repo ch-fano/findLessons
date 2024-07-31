@@ -1,13 +1,11 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from braces.views import GroupRequiredMixin
-
-from user_profile.forms import ProfileForm, TeacherForm
-from user_profile.models import Profile, Teacher
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from .models import Profile, Teacher
+from .forms import ProfileForm, TeacherForm
 
 # Create your views here.
 
@@ -19,22 +17,31 @@ def profile_home(request):
 
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
-
     elif request.user.groups.filter(name='Teachers').exists():
         template = 'user_profile/teacher_profile.html'
         teacher = get_object_or_404(Teacher, teacher=profile)
         ctx['teacher'] = teacher
-
     else:
         template = 'user_profile/student_profile.html'
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
+        profile_data = {key: request.POST[key] for key in ('first_name', 'last_name', 'email', 'tel_number', 'picture')
+                        if key in request.POST}
+        profile_form = ProfileForm(profile_data, request.FILES, instance=profile)
 
+        teacher_form = None
+        if 'teacher' in ctx:
+            teacher_data = {key: request.POST[key] for key in ('city', 'subjects', 'price') if key in request.POST}
+            teacher_form = TeacherForm(teacher_data, instance=ctx['teacher'])
+
+        if profile_form.is_valid() and (teacher_form is None or teacher_form.is_valid()):
+            profile_form.save()
             profile.refresh_from_db()
             ctx['profile'] = profile
+
+            if teacher_form:
+                teacher_form.save()
+                ctx['teacher'].refresh_from_db()
 
     return render(request, template_name=template, context=ctx)
 
