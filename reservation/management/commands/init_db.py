@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
         profile.first_name = name
         profile.last_name = surname
-        profile.email = f'{name}.{surname}@gmail.com'
+        profile.email = f'{name.lower()}.{surname.lower()}@gmail.com'
         profile.save()
 
     def set_teacher(self, user):

@@ -1,13 +1,117 @@
 {% extends 'user_profile/profile.html' %}
 
+{% block head %}
+    {{ block.super }}
+
+    <style>
+        .star-rating {
+            display: inline-block;
+            font-size: 2em;
+            color: #ccc;
+            margin-top: 10px;
+        }
+
+        .star {
+            position: relative;
+            display: inline-block;
+            width: 1em;
+            overflow: hidden;
+        }
+
+        .star.full {
+            color: #f39c12;
+        }
+
+        .star.half::before,
+        .star.quarter::before,
+        .star.three-quarters::before {
+            content: '\2605';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow: hidden;
+            color: #f39c12;
+        }
+
+        .star.quarter::before {
+            width: 35%;              /* Set to 35% instead of 25% for a better visualization*/
+        }
+
+        .star.half::before {
+            width: 45%;              /* Set to 45% instead of 50% for a better visualization*/
+        }
+
+        .star.three-quarters::before {
+            width: 55%;               /* Set to 55% instead of 75% for a better visualization*/
+        }
+
+        .star.empty {
+            color: #ccc;
+        }
+
+        .rating-label,
+        .details-label {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .details-container {
+            margin-bottom: 15px;
+        }
+
+        .rating-section,
+        .details-section {
+            margin-top: 10px;
+        }
+
+        .details-item {
+            margin: 5px 0;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .details-container span,
+        .star-rating span {
+            font-size: 1.2em;
+            line-height: 1.2em;
+        }
+    </style>
+{% endblock %}
+
 {% block info %}
     <div class="list">
-        <ul id="teacher-details">
-            <li>City: <span id="city-display">{{ teacher.city }}</span></li>
-            <li>Subjects: <span id="subjects-display">{{ teacher.subjects }}</span></li>
-            <li>Price: <span id="price-display">{{ teacher.price }}€</span></li>
-            <li>Stars: {{ teacher.stars }}/5</li>
-        </ul>
+        <div class="details-section" id="teacher-details">
+            <div class="details-label">City:</div>
+            <div class="details-container">
+                <span id="city-display">{{ teacher.city }}</span>
+            </div>
+
+            <div class="details-label">Subjects:</div>
+            <div class="details-container">
+                <span id="subjects-display">{{ teacher.subjects }}</span>
+            </div>
+
+            <div class="details-label">Price:</div>
+            <div class="details-container">
+                <span id="price-display">{{ teacher.price }}€</span>
+            </div>
+        </div>
+
+        <div class="rating-section" id="teacher-stars">
+            <div class="rating-label">Rating:</div>
+            <div class="star-rating">
+                <span class="star empty">&#9733;</span>
+                <span class="star empty">&#9733;</span>
+                <span class="star empty">&#9733;</span>
+                <span class="star empty">&#9733;</span>
+                <span class="star empty">&#9733;</span>
+            </div>
+        </div>
+
         <div class="button-container" id="teacher-button-container">
             <form id="availability-list-form" method="post" action="{% url 'reservation:availability_list' teacher.teacher_id %}">
                 {% csrf_token %}
@@ -32,4 +136,43 @@
             </div>
         </form>
     </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star-rating .star');
+            const rating = {{ teacher.stars }};
+
+            const fullStars = Math.floor(rating);
+            const fractionalPart = rating - fullStars;
+
+            let quarterStars = 0;
+            let halfStars = 0;
+            let threeQuartersStars = 0;
+
+            if (fractionalPart >= 0.75) {
+                threeQuartersStars = 1;
+            } else if (fractionalPart >= 0.5) {
+                halfStars = 1;
+            } else if (fractionalPart >= 0.25) {
+                quarterStars = 1;
+            }
+
+            stars.forEach((star, index) => {
+                star.classList.remove('full', 'half', 'quarter', 'three-quarters', 'empty');
+                if (index < fullStars) {
+                    star.classList.add('full');
+                } else if (index === fullStars && threeQuartersStars) {
+                    star.classList.add('three-quarters');
+                } else if (index === fullStars && halfStars) {
+                    star.classList.add('half');
+                } else if (index === fullStars && quarterStars) {
+                    star.classList.add('quarter');
+                } else {
+                    star.classList.add('empty');
+                }
+            });
+        });
+    </script>
 {% endblock %}

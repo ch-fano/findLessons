@@ -5,7 +5,6 @@
 {% block head %}
     {{ block.super }}
     <style>
-        /* Style remains the same */
         body {
             margin: 0;
             padding: 60px 0 0;
@@ -187,7 +186,7 @@
                     <button id="edit-button" class="btn btn-info" onclick="showEditForms()">Edit</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-info" id="logout-button">Logout</button>
+                        <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
                     </form>
                 </div>
                 <div class="button-container" id="confirm-container" style="display:none;">
@@ -212,6 +211,7 @@
             if (document.getElementById('edit-teacher-form')) {
                 document.getElementById('edit-teacher-form').style.display = 'block';
                 document.getElementById('teacher-details').style.display = 'none';
+                document.getElementById('teacher-stars').style.display = 'none';
                 document.getElementById('teacher-button-container').style.display = 'none';
             }
         }
@@ -228,6 +228,7 @@
             if (document.getElementById('edit-teacher-form')) {
                 document.getElementById('edit-teacher-form').style.display = 'none';
                 document.getElementById('teacher-details').style.display = 'block';
+                document.getElementById('teacher-stars').style.display = 'block';
                 document.getElementById('teacher-button-container').style.display = 'flex';
             }
 
