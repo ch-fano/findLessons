@@ -20,7 +20,7 @@ class Lesson(models.Model):
 
 
 class Availability(models.Model):
-    teacher = models.ManyToManyField(Profile)
+    teacher = models.ForeignKey(Profile, related_name='teacher_availability', on_delete=models.CASCADE)
     date = models.DateTimeField()
 
     def __str__(self):
@@ -28,8 +28,8 @@ class Availability(models.Model):
 
 
 class Rating(models.Model):
-    student = models.ForeignKey(Profile, related_name='student_ratings', on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Profile, related_name='teacher_ratings', on_delete=models.CASCADE)
+    student = models.ForeignKey(Profile, related_name='student_rating', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Profile, related_name='teacher_rating', on_delete=models.CASCADE)
     stars = models.IntegerField(validators=[
             MinValueValidator(0, message=_('Value must be greater than or equal to 0')),
             MaxValueValidator(5, message=_('Value must be less than or equal to 5'))])

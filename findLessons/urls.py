@@ -20,8 +20,8 @@ from django.conf.urls.static import static
 from django.urls import path, re_path, include
 from django.contrib.auth import views as auth_views
 
-
 from .views import *
+from .initcmds import erase_db, init_db
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,3 +32,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', include('user_profile.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+erase_db()
+init_db()
