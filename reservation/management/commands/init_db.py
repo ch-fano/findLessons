@@ -54,7 +54,7 @@ class Command(BaseCommand):
         subjects = ['Matematica', 'Italiano', 'Inglese', 'Latino', 'Greco', 'Fisica', 'Informatica']
         price_min = 15
 
-        teacher, _ = Teacher.objects.get_or_create(teacher=user.profile)
+        teacher, _ = Teacher.objects.get_or_create(profile=user.profile)
         teacher.city = random.choice(cities)
         teacher.subjects = random.choice(subjects)
 
