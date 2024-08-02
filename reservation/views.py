@@ -69,16 +69,17 @@ class SearchList(ListView):
         return ctx
 
 
-def get_availability(request, teacher):
+def get_availability(request, teacher_id):
     # check that the teacher id is correct
-    get_object_or_404(Teacher, teacher_id=teacher)
+    teacher = get_object_or_404(Teacher, teacher_id=teacher_id)
 
     filtered_list = Availability.objects.filter(
-        teacher_id=teacher,
+        teacher_id=teacher_id,
         date__gt=make_aware(datetime.now())
     ).order_by('date')
 
-    ctx = {'title': 'Show availabilities', 'list': filtered_list}
+    ctx = {'title': 'Show availabilities', 'list': filtered_list, 'is_me': (teacher.profile == request.user.profile)}
+
     return render(request, template_name='reservation/availability_list.html', context=ctx)
 
 
