@@ -19,7 +19,7 @@ def profile_home(request):
         template = 'user_profile/admin_profile.html'
     elif request.user.groups.filter(name='Teachers').exists():
         template = 'user_profile/teacher_profile.html'
-        teacher = get_object_or_404(Teacher, teacher=profile)
+        teacher = get_object_or_404(Teacher, profile=profile)
         ctx['teacher'] = teacher
     else:
         template = 'user_profile/student_profile.html'
@@ -75,5 +75,5 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         profile = get_object_or_404(Profile, user=self.request.user)
-        return get_object_or_404(Teacher, teacher=profile)
+        return get_object_or_404(Teacher, profile=profile)
 

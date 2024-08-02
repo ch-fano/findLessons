@@ -72,8 +72,8 @@ class Command(BaseCommand):
         for _ in range(random.randint(2, 7)):
             date = self.get_future_date(random.choice(hours))
 
-            if not Availability.objects.filter(teacher=user.profile, date=date).exists():
-                availability = Availability(teacher=user.profile, date=date)
+            if not Availability.objects.filter(teacher=user.profile.teacher, date=date).exists():
+                availability = Availability(teacher=user.profile.teacher, date=date)
                 availability.save()
 
     def set_lesson(self, student, teacher):
@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         for _ in range(random.randint(1, 3)):
             date = self.get_future_date(random.choice(hours))
-            subject = random.choice(teacher.teacher.subjects.replace(',', '').split())
+            subject = random.choice(teacher.subjects.replace(',', '').split())
 
             if (not Lesson.objects.filter(teacher=teacher, date=date).exists() and
                     not Lesson.objects.filter(student=student, date=date).exists()):
@@ -146,9 +146,9 @@ class Command(BaseCommand):
         students = students_group.user_set.all()
         teachers = teachers_group.user_set.all()
 
-        for teacher in teachers:
+        for teacher_user in teachers:
             for _ in range(random.randint(1, 4)):
-                student = random.choice(students)
-                self.set_lesson(student.profile, teacher.profile)
-                self.set_rating(student.profile, teacher.profile)
+                student_user = random.choice(students)
+                self.set_lesson(student_user.profile, teacher_user.profile.teacher)
+                self.set_rating(student_user.profile, teacher_user.profile.teacher)
 

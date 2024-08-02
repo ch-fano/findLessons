@@ -6,10 +6,10 @@ from reservation.models import Rating
 
 @receiver(post_save, sender=Rating)
 def update_teacher_stars(sender, instance, **kwargs):
-    teacher_profile = instance.teacher
-    ratings = Rating.objects.filter(teacher=teacher_profile)
+    teacher = instance.teacher
+    ratings = Rating.objects.filter(teacher=teacher)
 
     if ratings.exists():
         average_stars = ratings.aggregate(Avg('stars'))['stars__avg']
-        teacher_profile.teacher.stars = average_stars
-        teacher_profile.teacher.save()
+        teacher.stars = average_stars
+        teacher.save()

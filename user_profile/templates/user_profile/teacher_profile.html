@@ -113,7 +113,7 @@
         </div>
 
         <div class="button-container" id="teacher-button-container">
-            <form id="availability-list-form" method="post" action="{% url 'reservation:availability_list' teacher.teacher_id %}">
+            <form id="availability-list-form" method="post" action="{% url 'reservation:availability_list' teacher.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-info">View availability</button>
             </form>

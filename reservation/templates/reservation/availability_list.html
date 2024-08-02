@@ -9,8 +9,10 @@
         </ul>
     {% endfor %}
 
-    <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-info">Set new availability</button>
-    </form>
+    {% if is_me %}
+        <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-info">Set new availability</button>
+        </form>
+    {% endif%}
 {% endblock %}

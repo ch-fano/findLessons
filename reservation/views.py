@@ -71,10 +71,10 @@ class SearchList(ListView):
 
 def get_availability(request, teacher_id):
     # check that the teacher id is correct
-    teacher = get_object_or_404(Teacher, teacher_id=teacher_id)
+    teacher = get_object_or_404(Teacher, pk=teacher_id)
 
     filtered_list = Availability.objects.filter(
-        teacher_id=teacher_id,
+        teacher=teacher,
         date__gt=make_aware(datetime.now())
     ).order_by('date')
 
@@ -93,5 +93,6 @@ class CreateAvailabilityView(GroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         profile = get_object_or_404(Profile, user=self.request.user)
-        form.instance.teacher = profile
+        teacher = get_object_or_404(Teacher, profile=profile)
+        form.instance.teacher = teacher
         return super().form_valid(form)
