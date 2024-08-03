@@ -135,13 +135,15 @@
         const buttons = this.querySelector('.action-buttons');
         if (buttons) {
             const rect = this.getBoundingClientRect();
+            const pageWidth = document.documentElement.clientWidth;
+            const buttonLeft = rect.right - 60;
             buttons.style.display = 'block';
 
-            const boxWidth = rect.right - rect.left;
-            const buttonWidth = buttons.offsetWidth;
+            buttons.style.left = `${rect.right - 60}px`;
 
-            buttons.style.left = `${rect.left + (boxWidth / 2) - (buttonWidth / 2)}px`;
-            buttons.style.top = `${rect.top - buttons.offsetHeight}px`;
+            if(buttonLeft+buttons.offsetWidth>pageWidth)
+                buttons.style.left = `${rect.left -90}px`;
+            buttons.style.top = `${rect.top -5}px`;
         }
     });
 
