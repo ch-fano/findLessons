@@ -2,17 +2,166 @@
 
 {% block title %} {{ title }} {% endblock %}
 
-{% block content %}
-    {% for a in list %}
-        <ul>
-            {{ a }}
-        </ul>
-    {% endfor %}
+{% block head %}
+<style>
+    .calendar {
+        display: flex;
+        margin: 30px 0 10px;
+        flex-direction: column;
+        gap: 10px;
+        padding: 0 20px;
+    }
+    .calendar-week {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        justify-content: space-between;
+    }
+    .calendar-day {
+        border: 1px solid #ddd;
+        padding: 10px;
+        box-sizing: border-box;
+        flex: 1;
+        min-width: 120px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        background-color: #e3f2fd;
+        overflow: hidden;
+        position: relative;
+    }
+    .calendar-day.today {
+        background-color: #c9cff9;
+    }
+    .calendar-day h4 {
+        margin: 0;
+        text-align: center;
+        background: #5d9bde;
+        color: #fff;
+        padding: 5px;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .calendar-day ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .calendar-day li {
+        font-size: 16px;
+        position: relative;
+        cursor: pointer;
+        padding: 5px;
+    }
+    .calendar-day li:hover .action-buttons {
+        display: block;
+    }
+    .action-buttons {
+        display: none;
+        position: fixed;
+        background: #f1f1f1;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 5px;
+        text-align: center;
+        font-size: 12px;
+        z-index: 10;
+        white-space: nowrap;
+    }
+    .action-buttons button {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        margin: 0 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    .action-buttons button:hover {
+        background: #5d9bde;
+    }
+    .calendar-header {
+        text-align: center;
+        margin: 30px 0 10px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
 
-    {% if is_me %}
-        <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-info">Set new availability</button>
-        </form>
-    {% endif%}
+{% block content %}
+<div class="calendar-header">Teacher {{ teacher_name }} availabilities:</div>
+<div class="calendar">
+    {% for week in calendar_weeks %}
+        <div class="calendar-week">
+            {% for day in week %}
+                <div class="calendar-day {% if day.date == today %}today{% endif %}">
+                    <h4>{{ day.date|date:"D, M j" }}</h4>
+                    <ul>
+                        {% for time in day.times %}
+                            <li>
+                                {{ time }}
+                                <div class="action-buttons" style="left: 80%; top: 0;">
+                                    <button type="button" class="btn-custom" onclick="handleChange('{{ time }}')">Change</button>
+                                    <button type="button" class="btn-custom btn-secondary" onclick="handleDelete('{{ time }}')">Delete</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+{% if is_me %}
+    <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-custom">Set new availability</button>
+    </form>
+{% endif %}
+
+<script>
+    document.querySelectorAll('.calendar-day li').forEach(li => {
+    li.addEventListener('mouseenter', function(e) {
+        const buttons = this.querySelector('.action-buttons');
+        if (buttons) {
+            const rect = this.getBoundingClientRect();
+            buttons.style.display = 'block';
+
+            const boxWidth = rect.right - rect.left;
+            const buttonWidth = buttons.offsetWidth;
+
+            buttons.style.left = `${rect.left + (boxWidth / 2) - (buttonWidth / 2)}px`;
+            buttons.style.top = `${rect.top - buttons.offsetHeight}px`;
+        }
+    });
+
+    li.addEventListener('mouseleave', function() {
+        const buttons = this.querySelector('.action-buttons');
+        if (buttons) {
+            buttons.style.display = 'none';
+        }
+    });
+});
+
+function handleChange(time) {
+    // Handle the change action here
+    alert('Change ' + time);
+}
+
+function handleDelete(time) {
+    // Handle the delete action here
+    alert('Delete ' + time);
+}
+
+</script>
 {% endblock %}
