@@ -1,10 +1,20 @@
 from datetime import timedelta
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
+from django.utils import timezone
 from tempus_dominus.widgets import DateTimePicker, DatePicker
 from .models import Availability
+
+
+class ReservationForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    order = forms.ChoiceField(
+        choices=[('price', 'Price'), ('stars', 'Stars')],
+        initial='price',
+        widget=forms.Select
+    )
 
 
 class AvailabilityForm(forms.ModelForm):
@@ -42,6 +52,9 @@ class AvailabilityForm(forms.ModelForm):
         cleaned_data = super().clean()
         date = cleaned_data.get('date')
         current_instance_id = self.instance.id if self.instance else None
+
+        if date and date < timezone.now():
+            raise forms.ValidationError("The selected date cannot be in the past.")
 
         if self.teacher and date:
             start_range = date - timedelta(hours=1)

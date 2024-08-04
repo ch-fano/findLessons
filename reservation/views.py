@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from braces.views import GroupRequiredMixin
 
-from reservation.forms import AvailabilityForm
+from reservation.forms import AvailabilityForm, ReservationForm
 from reservation.models import Availability
 from user_profile.models import Profile, Teacher
 
@@ -25,48 +25,31 @@ def get_filtered_list(request, subject, city):
         'city': city,
     }
 
+    queryset = Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
+    print(queryset)
+
     if request.method == 'POST':
 
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
-        order_by = request.POST.get('order')
+        form = ReservationForm(request.POST)
 
-        queryset = Teacher.objects.filter(
-            subjects__icontains=subject,
-            city__iexact=city,
-            date__range=[start_date, end_date]
-        ).order_by(order_by)
+        if form.is_valid():
+            second_order = {'price': '-stars', '-stars': 'price'}
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            order = form.cleaned_data['order']
 
-        context['object_list'] = queryset
-        context['start_date'] = start_date
-        context['end_date'] = end_date
-        context['order_by'] = order_by
+            if order == 'stars':
+                order = '-'+order
+
+            queryset = queryset.filter(availability__date__range=[start_date, end_date]).order_by(
+                                                                                            order, second_order[order])
     else:
+        form = ReservationForm()
 
-        queryset = Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
-        context['object_list'] = queryset
+    context['object_list'] = queryset
+    context['form'] = form
 
     return render(request, 'reservation/reservation_home.html', context)
-
-
-class SearchList(ListView):
-    model = Teacher
-    template_name = 'reservation/reservation_home.html'
-    title = 'Reservation'
-
-    def get_queryset(self):
-        subject = self.request.resolver_match.kwargs['subject']
-        city = self.request.resolver_match.kwargs['city']
-
-        return Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-
-        ctx['subject'] = self.request.resolver_match.kwargs['subject']
-        ctx['city'] = self.request.resolver_match.kwargs['city']
-
-        return ctx
 
 
 def get_availability(request, teacher_id):

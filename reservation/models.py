@@ -20,7 +20,7 @@ class Lesson(models.Model):
 
 
 class Availability(models.Model):
-    teacher = models.ForeignKey(Teacher, related_name='teacher_availability', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, related_name='availability', on_delete=models.CASCADE)
     date = models.DateTimeField()
 
     def __str__(self):
