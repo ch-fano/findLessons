@@ -61,22 +61,25 @@
         padding: 5px;
     }
     .calendar-day li:hover .action-buttons {
-        display: block;
+        display: flex;
     }
     .action-buttons {
         display: none;
-        position: fixed;
+        position: absolute;
         background: #f1f1f1;
         border: 1px solid #ddd;
         border-radius: 5px;
         padding: 5px;
-        text-align: center;
         font-size: 12px;
         z-index: 10;
         white-space: nowrap;
+        top: 100%; /* Position below the list item */
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Centering */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Optional: shadow for better visibility */
     }
     .action-buttons button {
-        background:  #4CAF50;
+        background: #4CAF50;
         color: #fff;
         border: none;
         padding: 5px 10px;
@@ -94,7 +97,6 @@
         font-size: 20px;
         font-weight: bold;
     }
-
     .back-button {
         position: absolute;
         top: 70px;
@@ -102,8 +104,7 @@
         padding: 10px 20px;
         z-index: 10;
     }
-
-     .centered-button-container {
+    .centered-button-container {
         display: flex;
         justify-content: center;
         margin-top: 15px;
@@ -124,12 +125,11 @@
                             {% for time in day.times %}
                                 <li>
                                     {{ time.time }}
-                                    <div class="action-buttons" style="left: 80%; top: 0;">
+                                    <div class="action-buttons">
                                         <form id="availability-form" method="post" action="{% url 'reservation:availability_update' time.id %}">
                                             {% csrf_token %}
                                             <button type="submit" class="btn-custom">Change</button>
                                         </form>
-
                                         <form id="delete-form" method="get" action="{% url 'reservation:availability_delete' time.id %}">
                                             <button type="submit" class="btn-custom">Delete</button>
                                         </form>
@@ -157,14 +157,7 @@
             li.addEventListener('mouseenter', function(e) {
                 const buttons = this.querySelector('.action-buttons');
                 if (buttons) {
-                    const rect = this.getBoundingClientRect();
-                    const pageWidth = document.documentElement.clientWidth;
-                    const buttonLeft = rect.right - 60;
-                    buttons.style.display = 'block';
-                    buttons.style.left = `${rect.right - 60}px`;
-                    if (buttonLeft + buttons.offsetWidth > pageWidth)
-                        buttons.style.left = `${rect.left - 90}px`;
-                    buttons.style.top = `${rect.top - 5}px`;
+                    buttons.style.display = 'flex';
                 }
             });
 
