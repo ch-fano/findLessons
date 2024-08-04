@@ -94,69 +94,86 @@
         font-size: 20px;
         font-weight: bold;
     }
+
+    .back-button {
+        position: absolute;
+        top: 70px;
+        left: 20px;
+        padding: 10px 20px;
+        z-index: 10;
+    }
+
+     .centered-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="calendar-header">Teacher {{ teacher_name }} availabilities:</div>
-<div class="calendar">
-    {% for week in calendar_weeks %}
-        <div class="calendar-week">
-            {% for day in week %}
-                <div class="calendar-day {% if day.date == today %}today{% endif %}">
-                    <h4>{{ day.date|date:"D, M j" }}</h4>
-                    <ul>
-                        {% for time in day.times %}
-                            <li>
-                                {{ time.time }}
-                                <div class="action-buttons" style="left: 80%; top: 0;">
-                                    <form id="availability-form" method="post" action="{% url 'reservation:availability_update' time.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-custom">Change</button>
-                                    </form>
+    <input type="button" value="← Back" onClick="history.go(-1);" class="back-button btn-custom">
+    <div class="calendar-header">Teacher {{ teacher_name }} availabilities:</div>
+    <div class="calendar">
+        {% for week in calendar_weeks %}
+            <div class="calendar-week">
+                {% for day in week %}
+                    <div class="calendar-day {% if day.date == today %}today{% endif %}">
+                        <h4>{{ day.date|date:"D, M j" }}</h4>
+                        <ul>
+                            {% for time in day.times %}
+                                <li>
+                                    {{ time.time }}
+                                    <div class="action-buttons" style="left: 80%; top: 0;">
+                                        <form id="availability-form" method="post" action="{% url 'reservation:availability_update' time.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-custom">Change</button>
+                                        </form>
 
-                                    <form id="delete-form" method="get" action="{% url 'reservation:availability_delete' time.id %}">
-                                        <button type="submit" class="btn-custom">Delete</button>
-                                    </form>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endfor %}
+                                        <form id="delete-form" method="get" action="{% url 'reservation:availability_delete' time.id %}">
+                                            <button type="submit" class="btn-custom">Delete</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if is_me %}
+        <div class="centered-button-container">
+            <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-custom">Set new availability</button>
+            </form>
         </div>
-    {% endfor %}
-</div>
+    {% endif %}
 
-{% if is_me %}
-    <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn-custom">Set new availability</button>
-    </form>
-{% endif %}
+    <script>
+        document.querySelectorAll('.calendar-day li').forEach(li => {
+            li.addEventListener('mouseenter', function(e) {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    const rect = this.getBoundingClientRect();
+                    const pageWidth = document.documentElement.clientWidth;
+                    const buttonLeft = rect.right - 60;
+                    buttons.style.display = 'block';
+                    buttons.style.left = `${rect.right - 60}px`;
+                    if (buttonLeft + buttons.offsetWidth > pageWidth)
+                        buttons.style.left = `${rect.left - 90}px`;
+                    buttons.style.top = `${rect.top - 5}px`;
+                }
+            });
 
-<script>
-    document.querySelectorAll('.calendar-day li').forEach(li => {
-        li.addEventListener('mouseenter', function(e) {
-            const buttons = this.querySelector('.action-buttons');
-            if (buttons) {
-                const rect = this.getBoundingClientRect();
-                const pageWidth = document.documentElement.clientWidth;
-                const buttonLeft = rect.right - 60;
-                buttons.style.display = 'block';
-                buttons.style.left = `${rect.right - 60}px`;
-                if (buttonLeft + buttons.offsetWidth > pageWidth)
-                    buttons.style.left = `${rect.left - 90}px`;
-                buttons.style.top = `${rect.top - 5}px`;
-            }
+            li.addEventListener('mouseleave', function() {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    buttons.style.display = 'none';
+                }
+            });
         });
-
-        li.addEventListener('mouseleave', function() {
-            const buttons = this.querySelector('.action-buttons');
-            if (buttons) {
-                buttons.style.display = 'none';
-            }
-        });
-    });
-</script>
+    </script>
 {% endblock %}
