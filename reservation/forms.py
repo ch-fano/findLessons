@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -8,6 +10,7 @@ from .models import Availability
 class AvailabilityForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
+        self.teacher = kwargs.pop('teacher', None)
         super(AvailabilityForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'profile_form'
@@ -35,6 +38,27 @@ class AvailabilityForm(forms.ModelForm):
             ),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        current_instance_id = self.instance.id if self.instance else None
+
+        if self.teacher and date:
+            start_range = date - timedelta(hours=1)
+            end_range = date + timedelta(hours=1)
+            overlaps = Availability.objects.filter(
+                teacher=self.teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            )
+            if current_instance_id:
+                overlaps = overlaps.exclude(id=current_instance_id)
+
+            if overlaps.exists():
+                raise forms.ValidationError(
+                    "This teacher already has an availability within 1 hour of the selected date and time.")
+
+        return cleaned_data
 
 
 class SearchForm(forms.Form):

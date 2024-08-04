@@ -4,9 +4,54 @@
 {% block title %} {{ view.title }} {% endblock %}
 
 {% block content %}
-    <form method="post">{% csrf_token %}
-        {{ form | crispy }}
-        <input type="submit" class="btn-custom" value="Save">
-    </form>
-    {{ form.media }}
+    <style>
+        .full-page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: calc(100vh - 60px);
+            text-align: center;
+            position: relative;
+            padding-top: 40px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        h2 {
+            color: #333333;
+            margin-bottom: 20px;
+            margin-top: 50px;
+        }
+    </style>
+
+    <div class="full-page-container">
+        <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
+        <h2>{{ text }}</h2>
+        <div class="container">
+            <form method="post">{% csrf_token %}
+                {{ form | crispy }}
+                <input type="submit" class="btn-custom" value="Save">
+            </form>
+            {{ form.media }}
+        </div>
+    </div>
 {% endblock %}

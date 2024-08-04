@@ -137,11 +137,23 @@ class CreateAvailabilityView(GroupRequiredMixin, CreateView):
         teacher = get_object_or_404(Teacher, profile=profile)
         return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        profile = get_object_or_404(Profile, user=self.request.user)
+        teacher = get_object_or_404(Teacher, profile=profile)
+        kwargs['teacher'] = teacher
+        return kwargs
+
     def form_valid(self, form):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
         form.instance.teacher = teacher
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['text'] = 'Set a new availability:'
+        return ctx
 
 
 class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
@@ -155,6 +167,18 @@ class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
         return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['text'] = 'Update the availability:'
+        return ctx
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        profile = get_object_or_404(Profile, user=self.request.user)
+        teacher = get_object_or_404(Teacher, profile=profile)
+        kwargs['teacher'] = teacher
+        return kwargs
 
 
 class DeleteAvailabilityView(GroupRequiredMixin, DeleteView):
