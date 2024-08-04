@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from braces.views import GroupRequiredMixin
 
 from reservation.forms import AvailabilityForm
@@ -90,7 +90,10 @@ def get_availability(request, teacher_id):
         time_str = availability.date.strftime('%H:%M')
         if date_str not in availability_by_date:
             availability_by_date[date_str] = []
-        availability_by_date[date_str].append(time_str)
+        availability_by_date[date_str].append({
+            'time': time_str,
+            'id': availability.id
+        })
 
     # Create a list to store weeks and days for the calendar
     calendar_weeks = []
@@ -113,7 +116,7 @@ def get_availability(request, teacher_id):
 
     ctx = {
         'title': 'Show availabilities',
-        'teacher_name': teacher.profile.first_name+' '+teacher.profile.last_name,
+        'teacher_name': teacher.profile.first_name + ' ' + teacher.profile.last_name,
         'today': today,
         'calendar_weeks': calendar_weeks,
         'is_me': (teacher.profile == request.user.profile)
@@ -123,10 +126,10 @@ def get_availability(request, teacher_id):
 
 
 class CreateAvailabilityView(GroupRequiredMixin, CreateView):
-    group_required = ["Teachers"]
+    group_required = ['Teachers']
     model = Availability
     title = 'Set availability'
-    template_name = 'reservation/availability_create.html'
+    template_name = 'reservation/availability_create_update.html'
     form_class = AvailabilityForm
 
     def get_success_url(self):
@@ -139,3 +142,28 @@ class CreateAvailabilityView(GroupRequiredMixin, CreateView):
         teacher = get_object_or_404(Teacher, profile=profile)
         form.instance.teacher = teacher
         return super().form_valid(form)
+
+
+class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
+    group_required = ['Teachers']
+    model = Availability
+    title = 'Update availability'
+    template_name = 'reservation/availability_create_update.html'
+    form_class = AvailabilityForm
+
+    def get_success_url(self):
+        profile = get_object_or_404(Profile, user=self.request.user)
+        teacher = get_object_or_404(Teacher, profile=profile)
+        return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
+
+
+class DeleteAvailabilityView(GroupRequiredMixin, DeleteView):
+    group_required = ['Teachers']
+    model = Availability
+    title = 'Delete availability'
+    template_name = 'reservation/availability_delete.html'
+
+    def get_success_url(self):
+        profile = get_object_or_404(Profile, user=self.request.user)
+        teacher = get_object_or_404(Teacher, profile=profile)
+        return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})

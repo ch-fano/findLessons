@@ -76,7 +76,7 @@
         white-space: nowrap;
     }
     .action-buttons button {
-        background: #007bff;
+        background:  #4CAF50;
         color: #fff;
         border: none;
         padding: 5px 10px;
@@ -86,7 +86,7 @@
         font-size: 12px;
     }
     .action-buttons button:hover {
-        background: #5d9bde;
+        background: #45a049;
     }
     .calendar-header {
         text-align: center;
@@ -108,10 +108,16 @@
                     <ul>
                         {% for time in day.times %}
                             <li>
-                                {{ time }}
+                                {{ time.time }}
                                 <div class="action-buttons" style="left: 80%; top: 0;">
-                                    <button type="button" class="btn-custom" onclick="handleChange('{{ time }}')">Change</button>
-                                    <button type="button" class="btn-custom btn-secondary" onclick="handleDelete('{{ time }}')">Delete</button>
+                                    <form id="availability-form" method="post" action="{% url 'reservation:availability_update' time.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-custom">Change</button>
+                                    </form>
+
+                                    <form id="delete-form" method="get" action="{% url 'reservation:availability_delete' time.id %}">
+                                        <button type="submit" class="btn-custom">Delete</button>
+                                    </form>
                                 </div>
                             </li>
                         {% endfor %}
@@ -131,39 +137,26 @@
 
 <script>
     document.querySelectorAll('.calendar-day li').forEach(li => {
-    li.addEventListener('mouseenter', function(e) {
-        const buttons = this.querySelector('.action-buttons');
-        if (buttons) {
-            const rect = this.getBoundingClientRect();
-            const pageWidth = document.documentElement.clientWidth;
-            const buttonLeft = rect.right - 60;
-            buttons.style.display = 'block';
+        li.addEventListener('mouseenter', function(e) {
+            const buttons = this.querySelector('.action-buttons');
+            if (buttons) {
+                const rect = this.getBoundingClientRect();
+                const pageWidth = document.documentElement.clientWidth;
+                const buttonLeft = rect.right - 60;
+                buttons.style.display = 'block';
+                buttons.style.left = `${rect.right - 60}px`;
+                if (buttonLeft + buttons.offsetWidth > pageWidth)
+                    buttons.style.left = `${rect.left - 90}px`;
+                buttons.style.top = `${rect.top - 5}px`;
+            }
+        });
 
-            buttons.style.left = `${rect.right - 60}px`;
-
-            if(buttonLeft+buttons.offsetWidth>pageWidth)
-                buttons.style.left = `${rect.left -90}px`;
-            buttons.style.top = `${rect.top -5}px`;
-        }
+        li.addEventListener('mouseleave', function() {
+            const buttons = this.querySelector('.action-buttons');
+            if (buttons) {
+                buttons.style.display = 'none';
+            }
+        });
     });
-
-    li.addEventListener('mouseleave', function() {
-        const buttons = this.querySelector('.action-buttons');
-        if (buttons) {
-            buttons.style.display = 'none';
-        }
-    });
-});
-
-function handleChange(time) {
-    // Handle the change action here
-    alert('Change ' + time);
-}
-
-function handleDelete(time) {
-    // Handle the delete action here
-    alert('Delete ' + time);
-}
-
 </script>
 {% endblock %}

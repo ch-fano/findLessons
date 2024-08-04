@@ -24,7 +24,7 @@ class Availability(models.Model):
     date = models.DateTimeField()
 
     def __str__(self):
-        return str(self.date.date()) + ' at ' + str(self.date.time())
+        return 'ID: ' + str(self.pk) + ' -> ' + str(self.date.date()) + ' at ' + str(self.date.time())
 
 
 class Rating(models.Model):

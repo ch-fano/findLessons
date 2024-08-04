@@ -26,4 +26,6 @@ urlpatterns = [
     path('filter/<str:subject>/<str:city>/', get_filtered_list, name='filter'),
     path('availability/<int:teacher_id>/', get_availability, name='availability_list'),
     path('availability/create/', CreateAvailabilityView.as_view(), name='availability_create'),
+    path('availability/update/<int:pk>/', UpdateAvailabilityView.as_view(), name='availability_update'),
+    path('availability/delete/<int:pk>/', DeleteAvailabilityView.as_view(), name='availability_delete'),
 ]
