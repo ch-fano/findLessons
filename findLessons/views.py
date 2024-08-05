@@ -19,7 +19,7 @@ def homepage(request):
         if form.is_valid():
             subject = form.cleaned_data.get('subject')
             city = form.cleaned_data.get('city')
-            return redirect('reservation:search', subject, city)
+            return redirect('reservation:search', subject.lower(), city.lower())
     else:
         form = SearchForm()
 

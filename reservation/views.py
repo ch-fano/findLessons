@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta, datetime, time
+from django.utils import timezone
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -23,10 +24,10 @@ def get_filtered_list(request, subject, city):
     context = {
         'subject': subject,
         'city': city,
+        'title': 'Search teacher'
     }
 
     queryset = Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
-    print(queryset)
 
     if request.method == 'POST':
 
@@ -34,19 +35,20 @@ def get_filtered_list(request, subject, city):
 
         if form.is_valid():
             second_order = {'price': '-stars', '-stars': 'price'}
-            start_date = form.cleaned_data['start_date']
-            end_date = form.cleaned_data['end_date']
+            start_date = timezone.make_aware(datetime.combine(form.cleaned_data['start_date'], time(0, 0)))
+            end_date = timezone.make_aware(datetime.combine(form.cleaned_data['end_date'],
+                                                            time(23, 59, 59)))
             order = form.cleaned_data['order']
 
             if order == 'stars':
                 order = '-'+order
 
             queryset = queryset.filter(availability__date__range=[start_date, end_date]).order_by(
-                                                                                            order, second_order[order])
+                                                                                order, second_order[order]).distinct()
     else:
         form = ReservationForm()
 
-    context['object_list'] = queryset
+    context['teachers'] = queryset
     context['form'] = form
 
     return render(request, 'reservation/reservation_home.html', context)
