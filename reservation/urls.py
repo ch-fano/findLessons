@@ -23,8 +23,10 @@ app_name = 'reservation'
 urlpatterns = [
     path('', get_reservation_home, name='reservation_home'),
     path('search/<str:subject>/<str:city>/', get_filtered_list, name='search'),
-    path('availability/<int:teacher_id>/', get_availability, name='availability_list'),
-    path('availability/create/', CreateAvailabilityView.as_view(), name='availability_create'),
-    path('availability/update/<int:pk>/', UpdateAvailabilityView.as_view(), name='availability_update'),
-    path('availability/delete/<int:pk>/', DeleteAvailabilityView.as_view(), name='availability_delete'),
+    path('availability/<int:teacher_id>/', get_availability, name='availability-list'),
+    path('availability/create/', CreateAvailabilityView.as_view(), name='availability-create'),
+    path('availability/update/<int:pk>/', UpdateAvailabilityView.as_view(), name='availability-update'),
+    path('availability/delete/<int:pk>/', DeleteAvailabilityView.as_view(), name='availability-delete'),
+    path('lesson/<int:pk>/', LessonDetailView.as_view(), name='lesson-view'),
+
 ]

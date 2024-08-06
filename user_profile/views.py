@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,13 +8,13 @@ from django.shortcuts import render, get_object_or_404
 from .models import Profile, Teacher
 from .forms import ProfileForm, TeacherForm
 
-# Create your views here.
+# Create your views here.view
 
 
 @login_required
 def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
-    ctx = {'title': 'User profile', 'profile': profile}
+    ctx = {'title': 'User profile', 'profile': profile, 'is_me':True}
 
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
@@ -42,6 +43,23 @@ def profile_home(request):
             if teacher_form:
                 teacher_form.save()
                 ctx['teacher'].refresh_from_db()
+
+    return render(request, template_name=template, context=ctx)
+
+
+def view_profile(request, pk):
+
+    profile = get_object_or_404(Profile, pk=pk)
+    ctx = {'title': 'View profile', 'profile': profile, 'is_me': False}
+
+    if profile.user.is_superuser:
+        raise Http404
+    elif profile.user.groups.filter(name='Teachers').exists():
+        template = 'user_profile/teacher_profile.html'
+        teacher = get_object_or_404(Teacher, profile=profile)
+        ctx['teacher'] = teacher
+    else:
+        template = 'user_profile/student_profile.html'
 
     return render(request, template_name=template, context=ctx)
 

@@ -9,7 +9,7 @@ from user_profile.models import Profile
 
 def homepage(request):
 
-    ctx = {'title': 'findLessons'}
+    ctx = {'title': 'FindLessons'}
 
     if request.user.is_authenticated:
         ctx['profile'] = Profile.objects.get(user=request.user)

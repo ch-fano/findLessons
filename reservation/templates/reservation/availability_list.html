@@ -4,6 +4,10 @@
 
 {% block head %}
 <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
     .calendar {
         display: flex;
         margin: 30px 0 10px;
@@ -23,7 +27,7 @@
         box-sizing: border-box;
         flex: 1;
         min-width: 120px;
-        height: 120px;
+        height: 150px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -55,10 +59,16 @@
         overflow-y: auto;
     }
     .calendar-day li {
-        font-size: 16px;
+        font-size: 14px;
         position: relative;
         cursor: pointer;
         padding: 5px;
+    }
+    .calendar-day li.availability {
+        background-color: #e0f4ac;
+    }
+    .calendar-day li.lesson {
+        background-color: #f4bcac;
     }
     .calendar-day li:hover .action-buttons {
         display: flex;
@@ -122,19 +132,31 @@
                     <div class="calendar-day {% if day.date == today %}today{% endif %}">
                         <h4>{{ day.date|date:"D, M j" }}</h4>
                         <ul>
-                            {% for time in day.times %}
-                                <li>
-                                    {{ time.time }}
-                                    <div class="action-buttons">
-                                        <form id="availability-form" method="post" action="{% url 'reservation:availability_update' time.id %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn-custom">Change</button>
-                                        </form>
-                                        <form id="delete-form" method="get" action="{% url 'reservation:availability_delete' time.id %}">
-                                            <button type="submit" class="btn-custom">Delete</button>
-                                        </form>
-                                    </div>
-                                </li>
+                            {% for event in day.events %}
+                                {% if event.type == 'availability' %}
+                                    <li class="availability">
+                                        {{ event.time }}
+                                        <div class="action-buttons">
+                                            <form id="availability-form" method="post" action="{% url 'reservation:availability-update' event.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-custom">Change</button>
+                                            </form>
+                                            <form id="delete-form" method="get" action="{% url 'reservation:availability-delete' event.id %}">
+                                                <button type="submit" class="btn-custom">Delete</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% else %}
+                                    <li class="lesson">
+                                        {{ event.time }} - {{ event.subject }}
+                                        <div class="action-buttons">
+                                            <form id="lesson-form" method="post" action="{% url 'reservation:lesson-view' event.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-custom">View lesson</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>
@@ -145,7 +167,7 @@
 
     {% if is_me %}
         <div class="centered-button-container">
-            <form id="availability-form" method="post" action="{% url 'reservation:availability_create' %}">
+            <form id="availability-form" method="post" action="{% url 'reservation:availability-create' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn-custom">Set new availability</button>
             </form>

@@ -114,7 +114,7 @@
         .no-teachers {
             text-align: center;
             margin-top: 20px;
-            flex: 1; /* Ensure it stretches to fill the space */
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -158,7 +158,7 @@
                 <h2>Teacher found:</h2>
                 <div class="teachers-list">
                     {% for teacher in teachers %}
-                        <div class="teacher-container" data-rating="{{ teacher.stars }}" onclick="location.href='{% url 'homepage'%}'">
+                        <div class="teacher-container" data-rating="{{ teacher.stars }}" onclick="location.href='{% url 'user_profile:view-profile' teacher.profile.id%}'">
                             <div class="teacher-picture">
                                 <img src="{{ teacher.profile.picture.url }}" alt="{{ teacher.profile.first_name }} {{ teacher.profile.last_name }}">
                             </div>

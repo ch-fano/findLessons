@@ -182,13 +182,15 @@
                         <input type="tel" name="tel_number" id="tel_number" value="{{ profile.tel_number|default:'' }}" pattern="[0-9]*">
                     </div>
                 </form>
-                <div class="button-row" id="edit-buttons">
-                    <button id="edit-button" class="btn btn-info" onclick="showEditForms()">Edit</button>
-                    <form id="logout-form" method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
-                    </form>
-                </div>
+                {% if is_me %}
+                    <div class="button-row" id="edit-buttons">
+                        <button id="edit-button" class="btn btn-info" onclick="showEditForms()">Edit</button>
+                        <form id="logout-form" method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
+                        </form>
+                    </div>
+                {% endif %}
                 <div class="button-container" id="confirm-container" style="display:none;">
                     <button class="btn btn-info" onclick="submitForms()">Save changes</button>
                     <button type="button" class="btn btn-secondary" onclick="hideEditForms()">Cancel</button>

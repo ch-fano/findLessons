@@ -3,11 +3,11 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from braces.views import GroupRequiredMixin
 
 from reservation.forms import AvailabilityForm, ReservationForm
-from reservation.models import Availability
+from reservation.models import Availability, Lesson
 from user_profile.models import Profile, Teacher
 
 
@@ -56,29 +56,55 @@ def get_filtered_list(request, subject, city):
 
 def get_availability(request, teacher_id):
     teacher = get_object_or_404(Teacher, pk=teacher_id)
+    is_me = (teacher.profile == request.user.profile) if request.user.is_authenticated else False
 
     today = make_aware(datetime.now())
     start_date = today - timedelta(days=today.weekday())  # Start of this week (Monday)
-    end_date = start_date + timedelta(days=27)  # 3 weeks of days (3 weeks * 7 days - 1 day)
+    end_date = start_date + timedelta(days=20)  # 3 weeks of days (3 weeks * 7 days - 1 day)
 
     # Filter availability for the calculated range
-    filtered_list = Availability.objects.filter(
+    filtered_availability = Availability.objects.filter(
         teacher=teacher,
         date__gte=start_date,
         date__lt=end_date
     ).order_by('date')
 
-    # Create a dictionary to store availability by date
-    availability_by_date = {}
-    for availability in filtered_list:
+    # Create a dictionary to store events by date
+    events_by_date = {}
+    for availability in filtered_availability:
         date_str = availability.date.strftime('%Y-%m-%d')
         time_str = availability.date.strftime('%H:%M')
-        if date_str not in availability_by_date:
-            availability_by_date[date_str] = []
-        availability_by_date[date_str].append({
+        if date_str not in events_by_date:
+            events_by_date[date_str] = []
+        events_by_date[date_str].append({
+            'type': 'availability',
             'time': time_str,
             'id': availability.id
         })
+
+    if is_me:
+        # Filter lessons for the calculated range
+        filtered_lessons = Lesson.objects.filter(
+            teacher=teacher,
+            date__gte=start_date,
+            date__lt=end_date
+        ).order_by('date')
+
+        for lesson in filtered_lessons:
+            date_str = lesson.date.strftime('%Y-%m-%d')
+            time_str = lesson.date.strftime('%H:%M')
+            if date_str not in events_by_date:
+                events_by_date[date_str] = []
+            events_by_date[date_str].append({
+                'type': 'lesson',
+                'time': time_str,
+                'subject': lesson.subject,
+                'id': lesson.id
+            })
+
+    # Sort events within each date
+    for date_str in events_by_date:
+        events_by_date[date_str].sort(key=lambda x: x['time'])
 
     # Create a list to store weeks and days for the calendar
     calendar_weeks = []
@@ -89,7 +115,7 @@ def get_availability(request, teacher_id):
         date_str = current_date.strftime('%Y-%m-%d')
         current_week.append({
             'date': current_date,
-            'times': availability_by_date.get(date_str, [])
+            'events': events_by_date.get(date_str, [])
         })
         if len(current_week) == 7:
             calendar_weeks.append(current_week)
@@ -104,7 +130,7 @@ def get_availability(request, teacher_id):
         'teacher_name': teacher.profile.first_name + ' ' + teacher.profile.last_name,
         'today': today,
         'calendar_weeks': calendar_weeks,
-        'is_me': (teacher.profile == request.user.profile)
+        'is_me': is_me
     }
 
     return render(request, 'reservation/availability_list.html', context=ctx)
@@ -120,7 +146,7 @@ class CreateAvailabilityView(GroupRequiredMixin, CreateView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
+        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -151,7 +177,7 @@ class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
+        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -175,4 +201,10 @@ class DeleteAvailabilityView(GroupRequiredMixin, DeleteView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('reservation:availability_list', kwargs={'teacher_id': teacher.pk})
+        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
+
+
+class LessonDetailView(DetailView):
+    model = Lesson
+    template_name = 'reservation/lesson_detail.html'
+
