@@ -1,7 +1,10 @@
 from datetime import timedelta, datetime, time
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
 from django.utils import timezone
 from django.utils.timezone import make_aware
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from braces.views import GroupRequiredMixin
@@ -20,7 +23,6 @@ def get_reservation_home(request):
 
 
 def get_filtered_list(request, subject, city):
-
     context = {
         'subject': subject,
         'city': city,
@@ -41,10 +43,10 @@ def get_filtered_list(request, subject, city):
             order = form.cleaned_data['order']
 
             if order == 'stars':
-                order = '-'+order
+                order = '-' + order
 
             queryset = queryset.filter(availability__date__range=[start_date, end_date]).order_by(
-                                                                                order, second_order[order]).distinct()
+                order, second_order[order]).distinct()
     else:
         form = ReservationForm()
 
@@ -133,7 +135,7 @@ def get_calendar(request, teacher_id):
         'is_me': is_me
     }
 
-    return render(request, 'reservation/availability_list.html', context=ctx)
+    return render(request, 'reservation/calendar.html', context=ctx)
 
 
 class AvailabilityCreateView(GroupRequiredMixin, CreateView):
@@ -207,6 +209,7 @@ class AvailabilityDeleteView(GroupRequiredMixin, DeleteView):
 class LessonDetailView(GroupRequiredMixin, DetailView):
     group_required = ['Teachers', 'Students']
     model = Lesson
+    title = 'View lesson'
     template_name = 'reservation/lesson_detail.html'
 
 
@@ -244,3 +247,18 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
     def get_success_url(self):
         teacher_pk = self.request.session.get('teacher_pk')
         return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher_pk})
+
+
+@login_required
+def delete_lesson(self, pk, action):
+    lesson = get_object_or_404(Lesson, pk=pk)
+    teacher_pk = lesson.teacher.pk
+
+    if action == 'reset':
+        availability = Availability(date=lesson.date, teacher=lesson.teacher)
+        availability.save()
+    elif action != 'noreset':
+        return HttpResponseBadRequest("Invalid action parameter")
+
+    lesson.delete()
+    return redirect('reservation:availability-list', teacher_id=teacher_pk)

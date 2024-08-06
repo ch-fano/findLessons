@@ -1,5 +1,177 @@
-{% extends 'base.html' %}
+{% extends 'reservation/availability_delete.html' %}
+
+{% block title %} {{ view.title }} {% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <style>
+        .detail-container {
+            display: flex;
+            align-items: flex-start; /* Align items at the top */
+            justify-content: space-between;
+            gap: 20px;
+            width: 80%;
+            max-width: 800px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative; /* Make it a relative container for positioning */
+        }
+
+        .details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .student-picture {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 10px;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            flex-grow: 1;
+        }
+
+        .info h3 {
+            margin: 10px 0;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+
+        .delete-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .modal-button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-button.delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .modal-button.cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .modal-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-    <h1>ciao</h1>
+    <div class="full-page-container">
+        <input type="button" value="← Back" onClick="history.go(-1);" class="back-button">
+
+        <div class="detail-container">
+            <div class="details">
+                <img src="{{ object.student.picture.url }}" alt="{{ object.student.first_name }} {{ object.student.last_name }}" class="student-picture">
+                <div class="info">
+                    <h3 class="card-title">{{ object.student.first_name }} {{ object.student.last_name }}</h3>
+                    <p class="card-text"><strong>Subject:</strong> {{ object.subject }}</p>
+                    <p class="card-text"><strong>Date:</strong> {{ object.date|date:"H:i, d F Y" }}</p>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger delete-button" id="openModalButton">Delete lesson</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h5>Are you sure you want to delete this lesson?</h5>
+            <div class="modal-button-container">
+                <form method="post" action="{% url 'reservation:lesson-delete' object.id "reset" %}">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-button delete">Delete and reset availability</button>
+                </form>
+                <form method="post" action="{% url 'reservation:lesson-delete' object.id "noreset" %}">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-button delete">Delete</button>
+                </form>
+                <button class="modal-button cancel" id="closeModalButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const openModalButton = document.getElementById('openModalButton');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const confirmationModal = document.getElementById('confirmationModal');
+
+            openModalButton.addEventListener('click', function() {
+                confirmationModal.style.display = 'flex';
+            });
+
+            closeModalButton.addEventListener('click', function() {
+                confirmationModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === confirmationModal) {
+                    confirmationModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
 {% endblock %}

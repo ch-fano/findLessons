@@ -29,4 +29,5 @@ urlpatterns = [
     path('availability/delete/<int:pk>/', AvailabilityDeleteView.as_view(), name='availability-delete'),
     path('lesson/<int:pk>/', LessonDetailView.as_view(), name='lesson-view'),
     path('lesson/create/<int:availability_id>/', LessonCreateView.as_view(), name='lesson-create'),
+    path('lesson/delete/<int:pk>/<str:action>/', delete_lesson, name='lesson-delete'),
 ]

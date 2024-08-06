@@ -101,6 +101,12 @@
     .action-buttons button:hover {
         background: #45a049;
     }
+    .action-buttons .change-button {
+        margin-right: 2px;
+    }
+    .action-buttons .delete-button {
+        margin-left: 2px;
+    }
     .calendar-header {
         text-align: center;
         margin: 30px 0 10px;
@@ -138,15 +144,10 @@
                                         {{ event.time }}
                                         <div class="action-buttons">
                                             {% if is_me %}
-                                                <form id="availability-form" method="post" action="{% url 'reservation:availability-update' event.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn-custom">Change</button>
-                                                </form>
-                                                <form id="delete-form" method="get" action="{% url 'reservation:availability-delete' event.id %}">
-                                                    <button type="submit" class="btn-custom">Delete</button>
-                                                </form>
+                                                <a href="{% url 'reservation:availability-update' event.id %}" class="btn-custom change-button" style="text-decoration: none;">Change</a>
+                                                <a href="{% url 'reservation:availability-delete' event.id %}" class="btn-custom delete-button" style="text-decoration: none;">Delete</a>
                                             {% else %}
-                                                <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom">Book lesson</a>
+                                                <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom" style="text-decoration: none;">Book lesson</a>
                                             {% endif %}
                                         </div>
                                     </li>
@@ -154,10 +155,7 @@
                                     <li class="lesson">
                                         {{ event.time }} - {{ event.subject }}
                                         <div class="action-buttons">
-                                            <form id="lesson-form" method="post" action="{% url 'reservation:lesson-view' event.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn-custom">View lesson</button>
-                                            </form>
+                                            <a href="{% url 'reservation:lesson-view' event.id %}" class="btn-custom" style="text-decoration: none;">View lesson</a>
                                         </div>
                                     </li>
                                 {% endif %}
