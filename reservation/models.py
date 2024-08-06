@@ -10,8 +10,8 @@ from user_profile.models import Profile, Teacher
 # Create your models here.
 
 class Lesson(models.Model):
-    student = models.ForeignKey(Profile, related_name='student_lessons', on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, related_name='teacher_lessons', on_delete=models.CASCADE)
+    student = models.ForeignKey(Profile, related_name='lessons', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, related_name='lessons', on_delete=models.CASCADE)
     subject = models.CharField(max_length=15)
     date = models.DateTimeField()
 
@@ -20,7 +20,7 @@ class Lesson(models.Model):
 
 
 class Availability(models.Model):
-    teacher = models.ForeignKey(Teacher, related_name='availability', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, related_name='availabilities', on_delete=models.CASCADE)
     date = models.DateTimeField()
 
     def __str__(self):
@@ -28,8 +28,8 @@ class Availability(models.Model):
 
 
 class Rating(models.Model):
-    student = models.ForeignKey(Profile, related_name='student_rating', on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, related_name='teacher_rating', on_delete=models.CASCADE)
+    student = models.ForeignKey(Profile, related_name='ratings', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, related_name='ratings', on_delete=models.CASCADE)
     stars = models.IntegerField(validators=[
             MinValueValidator(0, message=_('Value must be greater than or equal to 0')),
             MaxValueValidator(5, message=_('Value must be less than or equal to 5'))])

@@ -54,7 +54,7 @@ def get_filtered_list(request, subject, city):
     return render(request, 'reservation/reservation_home.html', context)
 
 
-def get_availability(request, teacher_id):
+def get_calendar(request, teacher_id):
     teacher = get_object_or_404(Teacher, pk=teacher_id)
     is_me = (teacher.profile == request.user.profile) if request.user.is_authenticated else False
 
@@ -233,6 +233,7 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         availability = self.get_availability()
         form.instance.student = self.request.user.profile
         form.instance.teacher = availability.teacher
+        self.request.session['teacher_pk'] = availability.teacher.pk
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -241,5 +242,5 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         return ctx
 
     def get_success_url(self):
-        availability = self.get_availability()
-        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': availability.teacher.pk})
+        teacher_pk = self.request.session.get('teacher_pk')
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher_pk})
