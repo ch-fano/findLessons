@@ -137,13 +137,17 @@
                                     <li class="availability">
                                         {{ event.time }}
                                         <div class="action-buttons">
-                                            <form id="availability-form" method="post" action="{% url 'reservation:availability-update' event.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn-custom">Change</button>
-                                            </form>
-                                            <form id="delete-form" method="get" action="{% url 'reservation:availability-delete' event.id %}">
-                                                <button type="submit" class="btn-custom">Delete</button>
-                                            </form>
+                                            {% if is_me %}
+                                                <form id="availability-form" method="post" action="{% url 'reservation:availability-update' event.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-custom">Change</button>
+                                                </form>
+                                                <form id="delete-form" method="get" action="{% url 'reservation:availability-delete' event.id %}">
+                                                    <button type="submit" class="btn-custom">Delete</button>
+                                                </form>
+                                            {% else %}
+                                                <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom">Book lesson</a>
+                                            {% endif %}
                                         </div>
                                     </li>
                                 {% else %}
@@ -165,14 +169,16 @@
         {% endfor %}
     </div>
 
-    {% if is_me %}
         <div class="centered-button-container">
-            <form id="availability-form" method="post" action="{% url 'reservation:availability-create' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-custom">Set new availability</button>
-            </form>
+            {% if is_me %}
+                <form id="availability-form" method="post" action="{% url 'reservation:availability-create' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-custom">Set new availability</button>
+                </form>
+            {% else %}
+                <h3>Click on an availability to book a lesson</h3>
+            {% endif %}
         </div>
-    {% endif %}
 
     <script>
         document.querySelectorAll('.calendar-day li').forEach(li => {

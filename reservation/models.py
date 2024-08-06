@@ -12,7 +12,7 @@ from user_profile.models import Profile, Teacher
 class Lesson(models.Model):
     student = models.ForeignKey(Profile, related_name='student_lessons', on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, related_name='teacher_lessons', on_delete=models.CASCADE)
-    subject = models.CharField(max_length=50)
+    subject = models.CharField(max_length=15)
     date = models.DateTimeField()
 
     def __str__(self):

@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from braces.views import GroupRequiredMixin
 
-from reservation.forms import AvailabilityForm, ReservationForm
+from reservation.forms import AvailabilityForm, ReservationForm, LessonForm
 from reservation.models import Availability, Lesson
 from user_profile.models import Profile, Teacher
 
@@ -136,11 +136,11 @@ def get_availability(request, teacher_id):
     return render(request, 'reservation/availability_list.html', context=ctx)
 
 
-class CreateAvailabilityView(GroupRequiredMixin, CreateView):
+class AvailabilityCreateView(GroupRequiredMixin, CreateView):
     group_required = ['Teachers']
     model = Availability
     title = 'Set availability'
-    template_name = 'reservation/availability_create_update.html'
+    template_name = 'reservation/entity_create_update.html'
     form_class = AvailabilityForm
 
     def get_success_url(self):
@@ -167,11 +167,11 @@ class CreateAvailabilityView(GroupRequiredMixin, CreateView):
         return ctx
 
 
-class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
+class AvailabilityUpdateView(GroupRequiredMixin, UpdateView):
     group_required = ['Teachers']
     model = Availability
     title = 'Update availability'
-    template_name = 'reservation/availability_create_update.html'
+    template_name = 'reservation/entity_create_update.html'
     form_class = AvailabilityForm
 
     def get_success_url(self):
@@ -192,7 +192,7 @@ class UpdateAvailabilityView(GroupRequiredMixin, UpdateView):
         return kwargs
 
 
-class DeleteAvailabilityView(GroupRequiredMixin, DeleteView):
+class AvailabilityDeleteView(GroupRequiredMixin, DeleteView):
     group_required = ['Teachers']
     model = Availability
     title = 'Delete availability'
@@ -204,7 +204,42 @@ class DeleteAvailabilityView(GroupRequiredMixin, DeleteView):
         return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
 
 
-class LessonDetailView(DetailView):
+class LessonDetailView(GroupRequiredMixin, DetailView):
+    group_required = ['Teachers', 'Students']
     model = Lesson
     template_name = 'reservation/lesson_detail.html'
 
+
+class LessonCreateView(GroupRequiredMixin, CreateView):
+    group_required = ['Students']
+    model = Lesson
+    title = 'Book a lesson'
+    template_name = 'reservation/entity_create_update.html'
+    form_class = LessonForm
+
+    def get_availability(self):
+        return get_object_or_404(Availability, pk=self.kwargs['availability_id'])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        availability = self.get_availability()
+        kwargs['date'] = availability.date
+        teacher_availabilities = Availability.objects.filter(teacher=availability.teacher)
+        kwargs['teacher_availabilities'] = [a.date for a in teacher_availabilities]
+        kwargs['teacher_subjects'] = availability.teacher.subjects.replace(',', '').split()
+        return kwargs
+
+    def form_valid(self, form):
+        availability = self.get_availability()
+        form.instance.student = self.request.user.profile
+        form.instance.teacher = availability.teacher
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['text'] = 'Book a new lesson:'
+        return ctx
+
+    def get_success_url(self):
+        availability = self.get_availability()
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': availability.teacher.pk})

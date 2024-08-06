@@ -4,7 +4,7 @@ from crispy_forms.layout import Submit
 from django import forms
 from django.utils import timezone
 from tempus_dominus.widgets import DateTimePicker, DatePicker
-from .models import Availability
+from .models import Availability, Lesson
 
 
 class ReservationForm(forms.Form):
@@ -17,13 +17,47 @@ class ReservationForm(forms.Form):
     )
 
 
+class LessonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.date = kwargs.pop('date', None)
+        self.teacher_availabilities = kwargs.pop('teacher_availabilities', [])
+        self.teacher_subjects = kwargs.pop('teacher_subjects', [])
+        super(LessonForm, self).__init__(*args, **kwargs)
+
+        self.fields['subject'] = forms.ChoiceField(
+            choices=[(s, s) for s in self.teacher_subjects],
+            widget=forms.Select,
+            label="Select the subject",
+            required=True
+        )
+
+        self.fields['date'] = forms.ChoiceField(
+            choices=[(date, date.strftime('%Y-%m-%d %H:%M')) for date in self.teacher_availabilities],
+            widget=forms.Select,
+            label="Select availability date",
+            required=True
+        )
+
+        if self.date:
+            self.fields['date'].initial = [self.date]
+
+        self.helper = FormHelper()
+        self.helper.form_id = 'lesson_form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+    class Meta:
+        model = Lesson
+        fields = ['subject', 'date']
+
+
 class AvailabilityForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.teacher = kwargs.pop('teacher', None)
         super(AvailabilityForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'profile_form'
+        self.helper.form_id = 'availability_form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Submit'))
 
@@ -59,17 +93,22 @@ class AvailabilityForm(forms.ModelForm):
         if self.teacher and date:
             start_range = date - timedelta(hours=1)
             end_range = date + timedelta(hours=1)
-            overlaps = Availability.objects.filter(
+            availability_overlaps = Availability.objects.filter(
+                teacher=self.teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            )
+            lesson_overlaps = Lesson.objects.filter(
                 teacher=self.teacher,
                 date__gt=start_range,
                 date__lt=end_range
             )
             if current_instance_id:
-                overlaps = overlaps.exclude(id=current_instance_id)
+                availability_overlaps = availability_overlaps.exclude(id=current_instance_id)
 
-            if overlaps.exists():
+            if availability_overlaps.exists() or lesson_overlaps.exists():
                 raise forms.ValidationError(
-                    "This teacher already has an availability within 1 hour of the selected date and time.")
+                    "This teacher already has an event within 1 hour of the selected date and time.")
 
         return cleaned_data
 
