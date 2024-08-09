@@ -169,10 +169,7 @@
 
         <div class="centered-button-container">
             {% if is_me %}
-                <form id="availability-form" method="post" action="{% url 'reservation:availability-create' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-custom">Set new availability</button>
-                </form>
+                <a href="{% url 'reservation:availability-create'%}" class="btn-custom" style="text-decoration: none;">Set new availability</a>
             {% else %}
                 <h3>Click on an availability to book a lesson</h3>
             {% endif %}

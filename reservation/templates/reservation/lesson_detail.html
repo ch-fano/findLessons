@@ -120,10 +120,10 @@
         <input type="button" value="← Back" onClick="history.go(-1);" class="back-button">
 
         <div class="detail-container">
-            <div class="details">
+            <div class="details" onclick="location.href='{% url 'user_profile:view-profile' object.student.id%}'">
                 <img src="{{ object.student.picture.url }}" alt="{{ object.student.first_name }} {{ object.student.last_name }}" class="student-picture">
                 <div class="info">
-                    <h3 class="card-title">{{ object.student.first_name }} {{ object.student.last_name }}</h3>
+                    <h3 class="card-title" >{{ object.student.first_name }} {{ object.student.last_name }}</h3>
                     <p class="card-text"><strong>Subject:</strong> {{ object.subject }}</p>
                     <p class="card-text"><strong>Date:</strong> {{ object.date|date:"H:i, d F Y" }}</p>
                 </div>

@@ -1,10 +1,13 @@
 from django.http import Http404
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+
+from reservation.models import Lesson
 from .models import Profile, Teacher
 from .forms import ProfileForm, TeacherForm
 
@@ -24,6 +27,8 @@ def profile_home(request):
         ctx['teacher'] = teacher
     else:
         template = 'user_profile/student_profile.html'
+        ctx['today'] = timezone.now()
+        ctx['lessons'] = Lesson.objects.all().filter(student=profile).order_by('date')
 
     if request.method == 'POST':
         profile_data = {key: request.POST[key] for key in ('first_name', 'last_name', 'email', 'tel_number', 'picture')
@@ -94,4 +99,3 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         profile = get_object_or_404(Profile, user=self.request.user)
         return get_object_or_404(Teacher, profile=profile)
-

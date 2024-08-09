@@ -1,14 +1,214 @@
 {% extends 'user_profile/profile.html' %}
 
+{% block head %}
+    {{ block.super }}
+    <style>
+        .info-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+        }
+        .lesson-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.3s, display 0s 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+        .lesson-box.visible {
+            opacity: 1;
+            display: flex;
+            transition: opacity 0.3s;
+        }
+        .lesson-box.light-gray {
+            background-color: #d3d3d3;
+        }
+        .lesson-box.light-blue {
+            background-color: #add8e6;
+        }
+        .teacher-picture {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 20px;
+        }
+        .lesson-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .action-buttons {
+            display: none;
+            position: fixed;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 12px;
+            z-index: 10;
+            white-space: nowrap;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .action-buttons button {
+            border: none;
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-button:hover {
+            background-color: #dc3545;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .modal-button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .modal-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-button.delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .modal-button.cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        .modal-button:hover {
+            opacity: 0.8;
+        }
+
+    </style>
+{% endblock %}
+
 {% block info %}
-    <p> Student </p>
     <div class="list">
-        <ul>
-            <li>Example Item 1</li>
-            <li>Example Item 2</li>
-            <li>Example Item 3</li>
-            <li>Example Item 4</li>
-        </ul>
+        <h1>Your lessons:</h1>
+        <div class="info-container">
+            {% for lesson in lessons %}
+                <div class="lesson-box {% if lesson.date < today %}light-gray{% else %}light-blue{% endif %} visible" tabindex="0">
+                    <img class="teacher-picture" src="{{ lesson.teacher.profile.picture.url }}" alt="Teacher Picture">
+                    <div class="lesson-info">
+                        <p><strong>{{ lesson.subject }}</strong></p>
+                        <p>{{ lesson.teacher.profile.first_name }} {{ lesson.teacher.profile.last_name }}</p>
+                        <p>{{ lesson.date |date:"H:i, d F"}}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'user_profile:view-profile' lesson.teacher.profile.id %}" class="btn-custom" style="text-decoration: none;">View teacher</a>
+                        {% if lesson.date < today %}
+                            <a href="{% url 'reservation:rating-create-update' lesson.teacher.id %}" class="btn-custom" style="text-decoration: none;">Rate</a>
+                        {% endif %}
+                        <button class="btn-custom delete-button" data-lesson-id="{{ lesson.id }}">Delete</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h5>Are you sure you want to delete this lesson?</h5>
+            <div class="modal-button-container">
+                <form id="deleteForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-button delete">Delete</button>
+                </form>
+                <button class="modal-button cancel" id="closeModalButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.lesson-box').forEach(li => {
+            li.addEventListener('mouseenter', function(e) {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    const rect = li.getBoundingClientRect();
+                    buttons.style.top = `${rect.top + rect.height / 4}px`;
+                    buttons.style.left = `${rect.right-10}px`;
+                    buttons.style.display = 'flex';
+                }
+            });
+
+            li.addEventListener('mouseleave', function() {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    buttons.style.display = 'none';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.delete-button');
+            const confirmationModal = document.getElementById('confirmationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const deleteForm = document.getElementById('deleteForm');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const lessonId = this.getAttribute('data-lesson-id');
+                    const actionUrl = "{% url 'reservation:lesson-delete' 0 'action' %}".replace('/0/', `/${lessonId}/`).replace('/action/', `/reset/`);
+
+                    deleteForm.setAttribute('action', actionUrl);
+                    confirmationModal.style.display = 'flex';
+                });
+            });
+
+            closeModalButton.addEventListener('click', function() {
+                confirmationModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === confirmationModal) {
+                    confirmationModal.style.display = 'none';
+                }
+            });
+        });
+
+
+
+    </script>
 {% endblock %}

@@ -9,8 +9,8 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from braces.views import GroupRequiredMixin
 
-from reservation.forms import AvailabilityForm, ReservationForm, LessonForm
-from reservation.models import Availability, Lesson
+from reservation.forms import AvailabilityForm, ReservationForm, LessonForm, RatingForm
+from reservation.models import Availability, Lesson, Rating
 from user_profile.models import Profile, Teacher
 
 
@@ -250,15 +250,42 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
 
 
 @login_required
-def delete_lesson(self, pk, action):
+def delete_lesson(request, pk, action):
     lesson = get_object_or_404(Lesson, pk=pk)
     teacher_pk = lesson.teacher.pk
 
-    if action == 'reset':
+    if action == 'reset' and lesson.date > make_aware(datetime.now()):
         availability = Availability(date=lesson.date, teacher=lesson.teacher)
         availability.save()
-    elif action != 'noreset':
+    elif action != 'reset' and action != 'noreset':
         return HttpResponseBadRequest("Invalid action parameter")
 
     lesson.delete()
-    return redirect('reservation:availability-list', teacher_id=teacher_pk)
+
+    if request.user.groups.filter(name='Teachers').exists():
+        return redirect('reservation:availability-list', teacher_id=teacher_pk)
+    else:
+        return redirect('user_profile:profile')
+
+
+@login_required
+def create_update_rating(request, teacher_id):
+    if request.user.groups.filter(name='Teachers').exists():
+        return HttpResponseBadRequest("Teacher can't rate other teachers")
+
+    teacher = get_object_or_404(Teacher, pk=teacher_id)
+
+    try:
+        rating = Rating.objects.get(student=request.user.profile, teacher=teacher)
+        form = RatingForm(request.POST or None, instance=rating)
+    except Rating.DoesNotExist:
+        form = RatingForm(request.POST or None)
+
+    if form.is_valid():
+        rating = form.save(commit=False)
+        rating.student = request.user.profile
+        rating.teacher = teacher
+        rating.save()
+        return redirect('homepage')
+
+    return render(request, 'reservation/rating.html', {'form': form})

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .star-rating-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 20px auto;
+        }
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            flex-direction: row-reverse;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f39c12;
+        }
+    </style>
+
+    <div class="star-rating-container">
+        <form method="post">
+            {% csrf_token %}
+            <div class="star-rating">
+                {% for i in "54321" %}
+                    <input type="radio" name="stars" value="{{ i }}" id="star{{ i }}"
+                        {% if form.instance.stars|stringformat:"s" == i %} checked {% endif %}>
+                    <label for="star{{ i }}">&#9733;</label>
+                {% endfor %}
+                <!-- Hidden input to handle 0-star selection -->
+                <input type="radio" name="stars" value="0" id="star0"
+                    {% if form.instance.stars == 0 %} checked {% endif %}>
+                <label for="star0" style="display: none;">&#9733;</label> <!-- Hidden label -->
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const star1Input = document.getElementById('star1');
+            const star0Input = document.getElementById('star0');
+            const star1Label = document.querySelector('label[for="star1"]');
+
+            star1Label.addEventListener('click', function (event) {
+                // If the first star is already selected
+                if (star1Input.checked) {
+                    // Prevent the default behavior of the label click
+                    event.preventDefault();
+                    // Deselect the first star by selecting the hidden 0-star input
+                    star0Input.checked = true;
+                    // Trigger change event to update form state
+                    star0Input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
+{% endblock %}

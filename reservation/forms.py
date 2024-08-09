@@ -1,10 +1,10 @@
-from datetime import timedelta, datetime
+from datetime import timedelta
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from django.utils import timezone
-from tempus_dominus.widgets import DateTimePicker, DatePicker
-from .models import Availability, Lesson
+from tempus_dominus.widgets import DateTimePicker
+from .models import Availability, Lesson, Rating
 
 
 class ReservationForm(forms.Form):
@@ -116,3 +116,12 @@ class AvailabilityForm(forms.ModelForm):
 class SearchForm(forms.Form):
     subject = forms.CharField(label='Subject', max_length=100, required=True)
     city = forms.CharField(label='City', max_length=100, required=True)
+
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['stars']
+        widgets = {
+            'stars': forms.RadioSelect(choices=[(i, f"{i} ★") for i in range(0, 6)]),
+        }
