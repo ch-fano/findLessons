@@ -1,14 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'reservation/entity_create_update.html' %}
 
-{% block content %}
+{% block title %} Rate teacher {% endblock %}
+
+{% block head %}
+    {{ block.super }}
     <style>
-        .star-rating-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            margin: 20px auto;
-        }
         .star-rating {
             display: flex;
             justify-content: center;
@@ -18,7 +14,7 @@
             display: none;
         }
         .star-rating label {
-            font-size: 2rem;
+            font-size: 3rem;
             color: #ddd;
             cursor: pointer;
         }
@@ -28,23 +24,29 @@
             color: #f39c12;
         }
     </style>
+{% endblock %}
 
-    <div class="star-rating-container">
-        <form method="post">
-            {% csrf_token %}
-            <div class="star-rating">
-                {% for i in "54321" %}
-                    <input type="radio" name="stars" value="{{ i }}" id="star{{ i }}"
-                        {% if form.instance.stars|stringformat:"s" == i %} checked {% endif %}>
-                    <label for="star{{ i }}">&#9733;</label>
-                {% endfor %}
-                <!-- Hidden input to handle 0-star selection -->
-                <input type="radio" name="stars" value="0" id="star0"
-                    {% if form.instance.stars == 0 %} checked {% endif %}>
-                <label for="star0" style="display: none;">&#9733;</label> <!-- Hidden label -->
-            </div>
-            <button type="submit">Submit</button>
-        </form>
+{% block content %}
+    <div class="full-page-container">
+        <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
+        <div class="container">
+            <h3>Rate the teacher {{ teacher_name }}:</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="star-rating">
+                    {% for i in "54321" %}
+                        <input type="radio" name="stars" value="{{ i }}" id="star{{ i }}"
+                            {% if form.instance.stars|stringformat:"s" == i %} checked {% endif %}>
+                        <label for="star{{ i }}">&#9733;</label>
+                    {% endfor %}
+
+                    <input type="radio" name="stars" value="0" id="star0"
+                        {% if form.instance.stars == 0 %} checked {% endif %}>
+                    <label for="star0" style="display: none;">&#9733;</label>
+                </div>
+                <button type="submit" class="btn-custom">Submit</button>
+            </form>
+        </div>
     </div>
 
     <script>

@@ -288,4 +288,6 @@ def create_update_rating(request, teacher_id):
         rating.save()
         return redirect('homepage')
 
-    return render(request, 'reservation/rating.html', {'form': form})
+    ctx ={'form': form, 'teacher_name': teacher.profile.first_name+' '+teacher.profile.last_name}
+
+    return render(request, 'reservation/rating.html', ctx)
