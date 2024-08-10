@@ -37,16 +37,22 @@ def get_filtered_list(request, subject, city):
 
         if form.is_valid():
             second_order = {'price': '-stars', '-stars': 'price'}
-            start_date = timezone.make_aware(datetime.combine(form.cleaned_data['start_date'], time(0, 0)))
-            end_date = timezone.make_aware(datetime.combine(form.cleaned_data['end_date'],
-                                                            time(23, 59, 59)))
             order = form.cleaned_data['order']
 
             if order == 'stars':
                 order = '-' + order
 
-            queryset = queryset.filter(availability__date__range=[start_date, end_date]).order_by(
-                order, second_order[order]).distinct()
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+
+            if start_date:
+                start_date = timezone.make_aware(datetime.combine(start_date, time(0, 0)))
+                queryset = queryset.filter(availabilities__date__gte=start_date)
+            if end_date:
+                end_date = timezone.make_aware(datetime.combine(end_date, time(23, 59, 59)))
+                queryset = queryset.filter(availabilities__date__lte=end_date)
+
+            queryset = queryset.order_by(order, second_order[order]).distinct()
     else:
         form = ReservationForm()
 

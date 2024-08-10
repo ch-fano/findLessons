@@ -8,8 +8,14 @@ from .models import Availability, Lesson, Rating
 
 
 class ReservationForm(forms.Form):
-    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
     order = forms.ChoiceField(
         choices=[('price', 'Price'), ('stars', 'Stars')],
         initial='price',

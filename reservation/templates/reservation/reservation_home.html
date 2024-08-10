@@ -107,7 +107,7 @@
             align-items: flex-end;
         }
 
-        .btn-custom {
+        .btn-custom.length {
             width: 100%;
         }
 
@@ -149,7 +149,7 @@
                         {{ form.order }}
                     </div>
                     <div class="form-group form-submit">
-                        <button type="submit" class="btn-custom">Filter</button>
+                        <button type="submit" class="btn-custom length">Filter</button>
                     </div>
                 </div>
             </form>
@@ -180,6 +180,7 @@
             </div>
         {% else %}
             <div class="no-teachers">
+                <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
                 <h2>No teachers found for the subject {{ subject }}</h2>
                 <p>Sorry, we couldn't find any teachers that match your criteria.</p>
                 <img src="{% static 'imgs/not_found.png' %}" alt="not_found">
