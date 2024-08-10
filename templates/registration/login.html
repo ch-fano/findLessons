@@ -7,6 +7,7 @@
 {% block title %} Login {% endblock %} 
 
 {% block head %}
+    {{ block.super }}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,7 +62,7 @@
             justify-content: center;
             margin-top: 20px;
         }
-        .btn-custom {
+        .btn-login {
             width: 100%;
             padding: 10px 0;
             background-color: #4CAF50;
@@ -73,8 +74,9 @@
             text-align: center;
             text-decoration: none;
         }
-        .btn-custom:hover {
+        .btn-login:hover {
             background-color: #45a049;
+            color: white;
         }
         .register-button {
             margin-left: 10px;
@@ -83,7 +85,7 @@
 {% endblock %}
 
 {% block content %} 
-    
+    <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
     {% if user.is_authenticated %}
         <div class="full-page-container">
             <h1> Already logged in !!!</h1>
@@ -93,12 +95,12 @@
         <div class="container">
             <form method="post"> {% csrf_token %}
                 {{form | crispy}}
-                <input type="submit" class="btn-custom" value="Login">
+                <input type="submit" class="btn-login" value="Login">
             </form>
     
             <div class="register-section">
                 <span>Don't have an account?</span>
-                <a href="{% url "register" %}" class="btn-custom register-button">Register</a>
+                <a href="{% url "register" %}" class="btn-login register-button" style="text-decoration: none;">Register</a>
             </div>
         </div>
     {% endif %}

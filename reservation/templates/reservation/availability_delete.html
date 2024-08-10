@@ -16,21 +16,6 @@
             text-align: center;
             position: relative;
         }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 10;
-        }
-        .back-button:hover {
-            background-color: #45a049;
-        }
         .danger-image {
             margin: 20px 0;
             width: 256px;
@@ -39,13 +24,16 @@
         .delete-button {
             margin-top: 20px;
         }
+        .back-button.align{
+            top: 5px;
+        }
     </style>
 
 {% endblock %}
 
 {% block content %}
     <div class="full-page-container">
-        <input type="button" value="← Back" onClick="history.go(-1);" class="back-button">
+        <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button align">
         <h1>{{ object.date|date:"H:i, d F Y" }}</h1>
         <h2>Are you sure you want to delete this availability?</h2>
         <img src="{% static 'imgs/danger.png' %}" alt="Danger Image" class="danger-image">

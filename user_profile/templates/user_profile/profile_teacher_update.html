@@ -1,0 +1,38 @@
+{% extends 'registration/login.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %} {{view.title}} {% endblock %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+{% block head %}
+    {{ block.super }}
+    <style>
+        input[type="text"],
+        input[type="email"],
+        input[type="file"]{
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 0 0;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
+    <br>
+
+    <div class="container">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            <input type="submit" class="btn-login" value="Confirm">
+    </form>
+    </div>
+
+    <br>
+{% endblock %}

@@ -75,7 +75,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = Profile
     title = 'Update Profile'
     form_class = ProfileForm
-    template_name = 'user_profile/profile_update.html'
+    template_name = 'user_profile/profile_teacher_update.html'
 
     def get_success_url(self):
         if self.request.user.groups.filter(name='Teachers').exists():
@@ -95,7 +95,7 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
     model = Teacher
     title = 'Update Teacher'
     form_class = TeacherForm
-    template_name = 'user_profile/profile_update.html'
+    template_name = 'user_profile/profile_teacher_update.html'
     success_url = reverse_lazy('user_profile:profile')
 
     def get_object(self, queryset=None):

@@ -117,7 +117,7 @@
 
 {% block content %}
     <div class="full-page-container">
-        <input type="button" value="← Back" onClick="history.go(-1);" class="back-button">
+        <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button align">
 
         <div class="detail-container">
             <div class="details" onclick="location.href='{% url 'user_profile:view-profile' object.student.id%}'">
