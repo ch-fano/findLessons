@@ -33,3 +33,8 @@ class Rating(models.Model):
     stars = models.IntegerField(validators=[
             MinValueValidator(0, message=_('Value must be greater than or equal to 0')),
             MaxValueValidator(5, message=_('Value must be less than or equal to 5'))])
+
+    def __str__(self):
+        return ('ID: ' + str(self.pk) + ' -> ' + str(self.student.first_name) + ' ' + str(self.student.last_name) +
+                ' to ' + str(self.teacher.profile.first_name) + ' ' + str(self.teacher.profile.last_name) +
+                ': ' + str(self.stars))

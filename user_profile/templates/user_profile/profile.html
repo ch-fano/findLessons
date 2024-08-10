@@ -135,7 +135,6 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        /* Reduced size when editing */
         .profile-section.edit-mode .profile-image {
             width: 150px;
             height: 150px;
@@ -190,6 +189,11 @@
                             <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
                         </form>
                     </div>
+                    {% if is_student %}
+                        <div class="button-row" id="edit-buttons">
+                            <button id="rating-lesson-button" class="btn btn-info">Show votes</button>
+                        </div>
+                    {% endif %}
                 {% endif %}
                 <div class="button-container" id="confirm-container" style="display:none;">
                     <button class="btn btn-info" onclick="submitForms()">Save changes</button>
@@ -207,6 +211,7 @@
             document.getElementById('edit-button').style.display = 'none';
             document.getElementById('confirm-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
+            document.getElementById('rating-lesson-button').style.display = 'none';
             document.getElementById('edit-photo-button').style.display = 'block';
             document.getElementById('profile-section').classList.add('edit-mode');
 
@@ -224,6 +229,7 @@
             document.getElementById('edit-button').style.display = 'block';
             document.getElementById('confirm-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
+            document.getElementById('rating-lesson-button').style.display = 'block';
             document.getElementById('edit-photo-button').style.display = 'none';
             document.getElementById('profile-section').classList.remove('edit-mode');
 
@@ -293,5 +299,36 @@
             }
             reader.readAsDataURL(event.target.files[0]);
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.getElementById('rating-lesson-button');
+
+            if (toggleButton) {
+                toggleButton.addEventListener('click', toggleView);
+            }
+        });
+
+        // function to visualize ratings or lesson in the student profile
+        function toggleView() {
+            const lessonsContainer = document.getElementById('lessons-container');
+            const ratingsContainer = document.getElementById('ratings-container');
+            const toggleButton = document.getElementById('rating-lesson-button');
+            const headerTitle = document.getElementById('header-title');
+
+            if (lessonsContainer.style.display === 'none') {
+                lessonsContainer.style.display = 'block';
+                ratingsContainer.style.display = 'none';
+                toggleButton.innerText = 'Show votes';
+                headerTitle.textContent = 'Your lessons:';
+            } else {
+                lessonsContainer.style.display = 'none';
+                ratingsContainer.style.display = 'block';
+                toggleButton.innerText = 'Show lessons';
+                headerTitle.textContent = 'Your votes:';
+            }
+        }
+
+        // Event listener for toggle button
+        document.getElementById('rating-lesson-button').addEventListener('click', toggleView);
     </script>
 {% endblock %}

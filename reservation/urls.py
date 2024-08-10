@@ -31,4 +31,5 @@ urlpatterns = [
     path('lesson/create/<int:availability_id>/', LessonCreateView.as_view(), name='lesson-create'),
     path('lesson/delete/<int:pk>/<str:action>/', delete_lesson, name='lesson-delete'),
     path('rating/<int:teacher_id>/', create_update_rating, name='rating-create-update'),
+    path('rating/delete/<int:pk>/', RatingDeleteView.as_view(), name='rating-delete'),
 ]

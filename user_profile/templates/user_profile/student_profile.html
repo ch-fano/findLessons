@@ -1,4 +1,5 @@
 {% extends 'user_profile/profile.html' %}
+{% load static %}
 
 {% block head %}
     {{ block.super }}
@@ -13,7 +14,7 @@
             width: 100%;
             position: relative;
         }
-        .lesson-box {
+        .lesson-box, .rating-box {
             display: flex;
             align-items: center;
             gap: 20px;
@@ -26,7 +27,7 @@
             position: relative;
             cursor: pointer;
         }
-        .lesson-box.visible {
+        .lesson-box.visible, .rating-box.visible {
             opacity: 1;
             display: flex;
             transition: opacity 0.3s;
@@ -36,6 +37,9 @@
         }
         .lesson-box.light-blue {
             background-color: #add8e6;
+        }
+        .rating-box.light-yellow {
+            background-color: #f3f6e1;
         }
         .teacher-picture {
             width: 90px;
@@ -60,12 +64,13 @@
             white-space: nowrap;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        .action-buttons button {
+        .action-buttons button, .action-buttons a {
             border: none;
             padding: 5px 10px;
             margin: 0 5px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 12px;
         }
         .delete-button {
             background-color: #dc3545;
@@ -108,6 +113,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 0 5px;
         }
         .modal-button.delete {
             background-color: #dc3545;
@@ -121,13 +127,59 @@
             opacity: 0.8;
         }
 
+        .star-rating {
+            display: inline-block;
+            font-size: 2em;
+            color: #ccc;
+            margin-top: 10px;
+        }
+
+        .star {
+            position: relative;
+            display: inline-block;
+            width: 1em;
+            overflow: hidden;
+        }
+
+        .star.full {
+            color: #f39c12;
+        }
+
+        .star.half::before,
+        .star.quarter::before,
+        .star.three-quarters::before {
+            content: '\2605';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow: hidden;
+            color: #f39c12;
+        }
+
+        .star.quarter::before {
+            width: 35%;              /* Set to 35% instead of 25% for a better visualization*/
+        }
+
+        .star.half::before {
+            width: 45%;              /* Set to 45% instead of 50% for a better visualization*/
+        }
+
+        .star.three-quarters::before {
+            width: 55%;               /* Set to 55% instead of 75% for a better visualization*/
+        }
+
+        .star.empty {
+            color: #ccc;
+        }
+
     </style>
 {% endblock %}
 
 {% block info %}
-    <div class="list">
-        <h1>Your lessons:</h1>
-        <div class="info-container">
+  <div class="list">
+        <h2 id="header-title">Your lessons:</h2>
+        <div class="info-container" id="lessons-container">
             {% for lesson in lessons %}
                 <div class="lesson-box {% if lesson.date < today %}light-gray{% else %}light-blue{% endif %} visible" tabindex="0">
                     <img class="teacher-picture" src="{{ lesson.teacher.profile.picture.url }}" alt="Teacher Picture">
@@ -146,11 +198,34 @@
                 </div>
             {% endfor %}
         </div>
+
+        <div class="info-container" id="ratings-container" style="display:none;">
+            {% for rating in ratings %}
+                <div class="rating-box light-yellow visible" tabindex="0" data-rating="{{ rating.stars }}" data-rating-id="{{ rating.id }}">
+                    <img class="teacher-picture" src="{{ rating.teacher.profile.picture.url }}" alt="Teacher Picture">
+                    <div class="lesson-info">
+                        <p><strong>{{ rating.teacher.profile.first_name }} {{ rating.teacher.profile.last_name }}</strong></p>
+                        <div class="star-rating">
+                            <span class="star empty">&#9733;</span>
+                            <span class="star empty">&#9733;</span>
+                            <span class="star empty">&#9733;</span>
+                            <span class="star empty">&#9733;</span>
+                            <span class="star empty">&#9733;</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'user_profile:view-profile' rating.teacher.profile.id %}" class="btn-custom" style="text-decoration: none;">Show teacher</a>
+                        <a href="{% url 'reservation:rating-create-update' rating.teacher.id %}" class="btn-custom" style="text-decoration: none;">Change rate</a>
+                        <button class="btn-custom delete-button" data-rating-id="{{ rating.id }}">Delete</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
-            <h5>Are you sure you want to delete this lesson?</h5>
+            <h5 id="modal-message">Are you sure you want to delete this item?</h5>
             <div class="modal-button-container">
                 <form id="deleteForm" method="post">
                     {% csrf_token %}
@@ -161,14 +236,24 @@
         </div>
     </div>
 
+    <script src="{% static 'js/star_rating.js' %}"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingContainers = document.querySelectorAll('.rating-box');
+            ratingContainers.forEach(container => {
+                const rating = parseFloat(container.dataset.rating);
+                const starRatingElement = container.querySelector('.star-rating');
+                viewStars(starRatingElement, rating);
+            });
+        });
+
         document.querySelectorAll('.lesson-box').forEach(li => {
             li.addEventListener('mouseenter', function(e) {
                 const buttons = this.querySelector('.action-buttons');
                 if (buttons) {
                     const rect = li.getBoundingClientRect();
                     buttons.style.top = `${rect.top + rect.height / 4}px`;
-                    buttons.style.left = `${rect.right-10}px`;
+                    buttons.style.left = `${rect.right-25}px`;
                     buttons.style.display = 'flex';
                 }
             });
@@ -181,34 +266,51 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const deleteButtons = document.querySelectorAll('.delete-button');
-            const confirmationModal = document.getElementById('confirmationModal');
-            const closeModalButton = document.getElementById('closeModalButton');
-            const deleteForm = document.getElementById('deleteForm');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const lessonId = this.getAttribute('data-lesson-id');
-                    const actionUrl = "{% url 'reservation:lesson-delete' 0 'action' %}".replace('/0/', `/${lessonId}/`).replace('/action/', `/reset/`);
-
-                    deleteForm.setAttribute('action', actionUrl);
-                    confirmationModal.style.display = 'flex';
-                });
+        document.querySelectorAll('.rating-box').forEach(li => {
+            li.addEventListener('mouseenter', function(e) {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    const rect = li.getBoundingClientRect();
+                    buttons.style.top = `${rect.top + rect.height / 4}px`;
+                    buttons.style.left = `${rect.right-25}px`;
+                    buttons.style.display = 'flex';
+                }
             });
 
-            closeModalButton.addEventListener('click', function() {
-                confirmationModal.style.display = 'none';
-            });
-
-            window.addEventListener('click', function(event) {
-                if (event.target === confirmationModal) {
-                    confirmationModal.style.display = 'none';
+            li.addEventListener('mouseleave', function() {
+                const buttons = this.querySelector('.action-buttons');
+                if (buttons) {
+                    buttons.style.display = 'none';
                 }
             });
         });
 
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const deleteForm = document.getElementById('deleteForm');
 
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-lesson-id') || this.getAttribute('data-rating-id');
+                const isRating = this.hasAttribute('data-rating-id');
+                const actionUrl = isRating
+                    ? "{% url 'reservation:rating-delete' 0 %}".replace('/0/', `/${itemId}/`)
+                    : "{% url 'reservation:lesson-delete' 0 'action' %}".replace('/0/', `/${itemId}/`).replace('/action/', `/reset/`);
 
+                deleteForm.setAttribute('action', actionUrl);
+                document.getElementById('modal-message').textContent = `Are you sure you want to delete this ${isRating ? 'rating' : 'lesson'}?`;
+                confirmationModal.style.display = 'flex';
+            });
+        });
+
+        closeModalButton.addEventListener('click', function() {
+            confirmationModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === confirmationModal) {
+                confirmationModal.style.display = 'none';
+            }
+        });
     </script>
 {% endblock %}

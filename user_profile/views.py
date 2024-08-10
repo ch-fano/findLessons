@@ -7,7 +7,7 @@ from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 
-from reservation.models import Lesson
+from reservation.models import Lesson, Rating
 from .models import Profile, Teacher
 from .forms import ProfileForm, TeacherForm
 
@@ -17,7 +17,7 @@ from .forms import ProfileForm, TeacherForm
 @login_required
 def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
-    ctx = {'title': 'User profile', 'profile': profile, 'is_me':True}
+    ctx = {'title': 'User profile', 'profile': profile, 'is_me': True, 'is_student': False}
 
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
@@ -29,6 +29,8 @@ def profile_home(request):
         template = 'user_profile/student_profile.html'
         ctx['today'] = timezone.now()
         ctx['lessons'] = Lesson.objects.all().filter(student=profile).order_by('date')
+        ctx['ratings'] = Rating.objects.filter(student=profile)
+        ctx['is_student'] = True
 
     if request.method == 'POST':
         profile_data = {key: request.POST[key] for key in ('first_name', 'last_name', 'email', 'tel_number', 'picture')

@@ -286,8 +286,16 @@ def create_update_rating(request, teacher_id):
         rating.student = request.user.profile
         rating.teacher = teacher
         rating.save()
-        return redirect('homepage')
+        return redirect('user_profile:profile')
 
     ctx ={'form': form, 'teacher_name': teacher.profile.first_name+' '+teacher.profile.last_name}
 
     return render(request, 'reservation/rating.html', ctx)
+
+
+class RatingDeleteView(GroupRequiredMixin, DeleteView):
+    group_required = ['Students']
+    model = Rating
+    title = 'Delete rating'
+    success_url = reverse_lazy('user_profile:profile')
+
