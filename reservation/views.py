@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from braces.views import GroupRequiredMixin
 
-from reservation.forms import AvailabilityForm, ReservationForm, LessonForm, RatingForm
+from reservation.forms import *
 from reservation.models import Availability, Lesson, Rating
 from user_profile.models import Profile, Teacher, Notification
 
@@ -283,24 +283,25 @@ class LessonUpdateView(GroupRequiredMixin, UpdateView):
     model = Lesson
     title = 'Update lesson'
     template_name = 'reservation/entity_create_update.html'
-    form_class = LessonForm
+    form_class = UpdateLessonForm
 
     def form_valid(self, form):
-        old_date = form.instance.date
+        old_date = Lesson.objects.get(pk=form.instance.pk).date
         new_date = form.cleaned_data['date']
-        student = form.cleaned_data['student']
+        student = form.instance.student
 
         # teacher notification
         Notification.objects.create(
             profile=self.request.user.profile,
-            message=f'Updated lesson with the student {student.first_name} {student.last_name} from {old_date} to {new_date}',
+            message=f'Updated lesson with the student {student.first_name} {student.last_name} from {old_date} to '
+                    f'{new_date}',
         )
 
         # student notification
         Notification.objects.create(
             profile=student,
-            message=f'Updated lesson by the teacher {self.request.user.profile.first_name} {self.request.user.profile.last_name}'
-                    f'from {old_date} to {new_date}',
+            message=f'Updated lesson by the teacher {self.request.user.profile.first_name} '
+                    f'{self.request.user.profile.last_name} from {old_date} to {new_date}',
         )
         return super().form_valid(form)
 
@@ -310,8 +311,7 @@ class LessonUpdateView(GroupRequiredMixin, UpdateView):
         return ctx
 
     def get_success_url(self):
-        teacher_pk = self.request.session.get('teacher_pk')
-        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher_pk})
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': self.request.user.profile.teacher.pk})
 
 
 @login_required

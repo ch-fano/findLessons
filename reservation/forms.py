@@ -5,6 +5,7 @@ from django import forms
 from django.utils import timezone
 from tempus_dominus.widgets import DateTimePicker
 from .models import Availability, Lesson, Rating
+from user_profile.models import Notification
 
 
 class ReservationForm(forms.Form):
@@ -135,7 +136,6 @@ class RatingForm(forms.ModelForm):
 
 class UpdateLessonForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.teacher = kwargs.pop('teacher', None)
         super(UpdateLessonForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'update_lesson_form'
@@ -166,30 +166,46 @@ class UpdateLessonForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         date = cleaned_data.get('date')
-        current_instance_id = self.instance.id if self.instance else None
+        teacher = self.instance.teacher
+        student = self.instance.student
+        lesson_id = self.instance.id
 
         if date and date < timezone.now():
             raise forms.ValidationError("The selected date cannot be in the past.")
 
-        if self.teacher and date:
+        if teacher and date:
             start_range = date - timedelta(hours=1)
             end_range = date + timedelta(hours=1)
-            availability_overlaps = Availability.objects.filter(
-                teacher=self.teacher,
-                date__gt=start_range,
-                date__lt=end_range
-            )
-            lesson_overlaps = Lesson.objects.filter(
-                teacher=self.teacher,
-                date__gt=start_range,
-                date__lt=end_range
-            )
-            if current_instance_id:
-                availability_overlaps = availability_overlaps.exclude(id=current_instance_id)
 
-            if availability_overlaps.exists() or lesson_overlaps.exists():
+            teacher_lesson_overlaps = Lesson.objects.filter(
+                teacher=teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            ).exclude(id=lesson_id)
+
+            if teacher_lesson_overlaps.exists():
                 raise forms.ValidationError(
-                    "This teacher already has an event within 1 hour of the selected date and time.")
+                    "This teacher already has a lesson within 1 hour of the selected date and time.")
+
+            student_lesson_overlaps = Lesson.objects.filter(
+                student=student,
+                date__gt=start_range,
+                date__lt=end_range
+            ).exclude(id=lesson_id)
+
+            if student_lesson_overlaps.exists():
+                raise forms.ValidationError(
+                    "This student already has a lesson within 1 hour of the selected date and time.")
+
+            availability_overlaps = Availability.objects.filter(
+                teacher=teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            )
+
+            for av in availability_overlaps:
+                Notification.objects.create(profile=teacher.profile, message=f'Deleted availability on {av.date}')
+                av.delete()
 
         return cleaned_data
 
