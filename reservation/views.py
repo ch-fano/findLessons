@@ -45,10 +45,18 @@ def get_filtered_list(request, subject, city):
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
 
-            if start_date:
+            # it's necessary to use the range function otherwise the problem occurs when there is an availability
+            # greater than end_date (> start_date) and another less than the start_date (<end_date).
+            # In this example the teacher is selected, but it's an error. It could also happen with start_date>end_date
+
+            if start_date and end_date:
+                start_date = timezone.make_aware(datetime.combine(start_date, time(0, 0)))
+                end_date = timezone.make_aware(datetime.combine(end_date, time(23, 59, 59)))
+                queryset = queryset.filter(availabilities__date__range=[start_date,end_date])
+            elif start_date:
                 start_date = timezone.make_aware(datetime.combine(start_date, time(0, 0)))
                 queryset = queryset.filter(availabilities__date__gte=start_date)
-            if end_date:
+            elif end_date:
                 end_date = timezone.make_aware(datetime.combine(end_date, time(23, 59, 59)))
                 queryset = queryset.filter(availabilities__date__lte=end_date)
 

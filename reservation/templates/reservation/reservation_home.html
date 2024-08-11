@@ -23,35 +23,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             flex: 1;
             margin: 15px;
         }
 
         .teachers-list {
             display: flex;
-        .teachers-list-container h2{
-            margin: 15px;
-        }
             flex-wrap: wrap;
             gap: 20px;
             margin: 0 auto;
             max-width: 1200px;
             padding: 0 15px;
+            justify-content: center;
         }
-
+         .teachers-list-container h2{
+             margin: 15px;
+         }
         .teacher-container {
             display: flex;
             align-items: center;
+            justify-content: flex-start;
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 8px;
             background-color: #f9f9f9;
-            flex: 1 1 calc(50% - 20px);
             box-sizing: border-box;
-            max-width: calc(50% - 20px);
-            min-width: 300px;
+            width: 500px;
+            height: 250px;
             cursor: pointer;
             transition: transform 0.2s;
+            flex: none;
         }
 
         .teacher-container:hover {
