@@ -11,7 +11,7 @@ from braces.views import GroupRequiredMixin
 
 from reservation.forms import AvailabilityForm, ReservationForm, LessonForm, RatingForm
 from reservation.models import Availability, Lesson, Rating
-from user_profile.models import Profile, Teacher
+from user_profile.models import Profile, Teacher, Notification
 
 
 # Create your views here.
@@ -52,7 +52,7 @@ def get_filtered_list(request, subject, city):
             if start_date and end_date:
                 start_date = timezone.make_aware(datetime.combine(start_date, time(0, 0)))
                 end_date = timezone.make_aware(datetime.combine(end_date, time(23, 59, 59)))
-                queryset = queryset.filter(availabilities__date__range=[start_date,end_date])
+                queryset = queryset.filter(availabilities__date__range=[start_date, end_date])
             elif start_date:
                 start_date = timezone.make_aware(datetime.combine(start_date, time(0, 0)))
                 queryset = queryset.filter(availabilities__date__gte=start_date)
@@ -251,6 +251,21 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         form.instance.student = self.request.user.profile
         form.instance.teacher = availability.teacher
         self.request.session['teacher_pk'] = availability.teacher.pk
+        subject = form.cleaned_data.get('subject')
+
+        # teacher notification
+        Notification.objects.create(
+            profile=availability.teacher.profile,
+            message=f'Booked a new {subject} lesson on {availability.date} from {self.request.user.profile.first_name} '
+                    f'{self.request.user.profile.last_name}',
+        )
+
+        # student notification
+        Notification.objects.create(
+            profile=self.request.user.profile,
+            message=f'Booked a new {subject} lesson on {availability.date} with {availability.teacher.profile.first_name} '
+                    f'{availability.teacher.profile.last_name}',
+        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -263,22 +278,76 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher_pk})
 
 
+class LessonUpdateView(GroupRequiredMixin, UpdateView):
+    group_required = ['Teachers']
+    model = Lesson
+    title = 'Update lesson'
+    template_name = 'reservation/entity_create_update.html'
+    form_class = LessonForm
+
+    def form_valid(self, form):
+        old_date = form.instance.date
+        new_date = form.cleaned_data['date']
+        student = form.cleaned_data['student']
+
+        # teacher notification
+        Notification.objects.create(
+            profile=self.request.user.profile,
+            message=f'Updated lesson with the student {student.first_name} {student.last_name} from {old_date} to {new_date}',
+        )
+
+        # student notification
+        Notification.objects.create(
+            profile=student,
+            message=f'Updated lesson by the teacher {self.request.user.profile.first_name} {self.request.user.profile.last_name}'
+                    f'from {old_date} to {new_date}',
+        )
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['text'] = 'Update lesson:'
+        return ctx
+
+    def get_success_url(self):
+        teacher_pk = self.request.session.get('teacher_pk')
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher_pk})
+
+
 @login_required
 def delete_lesson(request, pk, action):
     lesson = get_object_or_404(Lesson, pk=pk)
     teacher_pk = lesson.teacher.pk
 
+    reset_msg = ''
+    msg = f'Canceled the lesson on {lesson.date}'
+    student_name = lesson.student.first_name + ' ' + lesson.student.last_name + '. '
+    teacher_name = lesson.teacher.profile.first_name + ' ' + lesson.teacher.profile.last_name + '. '
+
     if action == 'reset' and lesson.date > make_aware(datetime.now()):
         availability = Availability(date=lesson.date, teacher=lesson.teacher)
         availability.save()
+        reset_msg = 'Resetted the availability.'
     elif action != 'reset' and action != 'noreset':
         return HttpResponseBadRequest("Invalid action parameter")
 
     lesson.delete()
 
     if request.user.groups.filter(name='Teachers').exists():
+        # teacher notification
+        Notification.objects.create(profile=request.user.profile, message=msg + ' with '+student_name + reset_msg)
+
+        # student notification
+        Notification.objects.create(profile=request.user.profile, message=msg + ' by ' + teacher_name)
+
         return redirect('reservation:availability-list', teacher_id=teacher_pk)
     else:
+        # teacher notification
+        Notification.objects.create(profile=request.user.profile, message=msg + ' by ' + student_name + reset_msg)
+
+        # student notification
+        Notification.objects.create(profile=request.user.profile, message=msg + ' with ' + teacher_name)
+
         return redirect('user_profile:profile')
 
 
@@ -302,7 +371,7 @@ def create_update_rating(request, teacher_id):
         rating.save()
         return redirect('user_profile:profile')
 
-    ctx ={'form': form, 'teacher_name': teacher.profile.first_name+' '+teacher.profile.last_name}
+    ctx = {'form': form, 'teacher_name': teacher.profile.first_name + ' ' + teacher.profile.last_name}
 
     return render(request, 'reservation/rating.html', ctx)
 
@@ -312,4 +381,3 @@ class RatingDeleteView(GroupRequiredMixin, DeleteView):
     model = Rating
     title = 'Delete rating'
     success_url = reverse_lazy('user_profile:profile')
-

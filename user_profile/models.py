@@ -43,3 +43,13 @@ class Teacher(models.Model):
     def __str__(self):
         return ('ID: ' + str(self.pk) + ' -> ' + self.city + ' ' + self.subjects+ ' ' + str(self.price) + ' ' +
                 str(self.stars))
+
+
+class Notification(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Notification for {self.profile.first_name} {self.profile.last_name}: {self.message}'

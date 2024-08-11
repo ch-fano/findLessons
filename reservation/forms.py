@@ -131,3 +131,65 @@ class RatingForm(forms.ModelForm):
         widgets = {
             'stars': forms.RadioSelect(choices=[(i, f"{i} ★") for i in range(0, 6)]),
         }
+
+
+class UpdateLessonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.teacher = kwargs.pop('teacher', None)
+        super(UpdateLessonForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'update_lesson_form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+        if self.instance:
+            self.fields['date'].widget.attrs['value'] = self.instance.date
+
+    class Meta:
+        model = Lesson
+        fields = ['date']
+        widgets = {
+            'date': DateTimePicker(
+                options={
+                    'useCurrent': True,
+                    'collapse': False,
+                    'sideBySide': True,
+                    'format': 'YYYY-MM-DD HH:mm',
+                },
+                attrs={
+                    'input_toggle': True,
+                    'input_group': True,
+                }
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        current_instance_id = self.instance.id if self.instance else None
+
+        if date and date < timezone.now():
+            raise forms.ValidationError("The selected date cannot be in the past.")
+
+        if self.teacher and date:
+            start_range = date - timedelta(hours=1)
+            end_range = date + timedelta(hours=1)
+            availability_overlaps = Availability.objects.filter(
+                teacher=self.teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            )
+            lesson_overlaps = Lesson.objects.filter(
+                teacher=self.teacher,
+                date__gt=start_range,
+                date__lt=end_range
+            )
+            if current_instance_id:
+                availability_overlaps = availability_overlaps.exclude(id=current_instance_id)
+
+            if availability_overlaps.exists() or lesson_overlaps.exists():
+                raise forms.ValidationError(
+                    "This teacher already has an event within 1 hour of the selected date and time.")
+
+        return cleaned_data
+
