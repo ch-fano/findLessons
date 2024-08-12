@@ -24,5 +24,6 @@ urlpatterns = [
     path('view/<int:pk>', view_profile, name='view-profile'),
     path('set/', ProfileUpdateView.as_view(), name='set-profile'),
     path('set/teacher/', TeacherUpdateView.as_view(), name='set-teacher'),
+    path('notification/', get_news, name='view-notification'),
 ]
 

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %} {{ title }} {% endblock %}
 
@@ -142,6 +143,14 @@
         .profile-section.edit-mode .profile-info p {
             font-size: 1em;
         }
+        .notification-gif, .notification-png {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 70px;
+            height: 70px;
+            z-index: 10;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -150,6 +159,15 @@
     {% endif %}
     <div class="container">
         <div class="profile-section" id="profile-section">
+            {% if is_me%}
+                <a href="{% url 'user_profile:view-notification' %}" style="text-decoration: none;">
+                    {% if news %}
+                        <img id="news-gif" class="notification-gif" src="{% static 'imgs/newspaper.gif' %}" alt="New notification">
+                    {% else %}
+                        <img id="news-png" class="notification-png" src="{% static 'imgs/newspaper.png' %}" alt="View notification">
+                    {% endif %}
+                </a>
+            {% endif %}
             <div class="profile-image" id="profile-image">
                 <img id="profile-pic" src="{{ profile.picture.url }}" alt="Profile Image">
                 <div class="edit-photo" id="edit-photo-button" onclick="triggerFileInput()">Edit ✏️</div>

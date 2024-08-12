@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    {{ block.super }}
+    <style>
+        .notifications-container {
+            margin-top: 20px;
+        }
+        .notification-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .notification-content {
+            flex-grow: 1;
+        }
+        .notification-timestamp {
+            font-size: 0.9em;
+            color: #666666;
+            margin-bottom: 5px;
+        }
+        .notification-message {
+            font-size: 1.1em;
+            color: #333333;
+        }
+        .notification-close {
+            flex-shrink: 0;
+            margin-left: 20px;
+        }
+        .close-button {
+            font-size: 1.2em;
+            color: #ff0000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .close-button:hover {
+            color: #cc0000;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2>Notifications:</h2>
+    <div class="notifications-container">
+        {% for notification in news %}
+            <div class="notification-box">
+                <div class="notification-content">
+                    <p class="notification-timestamp">{{ notification.timestamp|date:"F j, Y, g:i a" }}</p>
+                    <p class="notification-message">{{ notification.message }}</p>
+                </div>
+                <div class="notification-close">
+                    <a href="{% url 'notification_delete_url' notification.id %}" class="close-button">X</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No new notifications.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

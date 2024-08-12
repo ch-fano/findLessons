@@ -19,6 +19,14 @@ def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
     ctx = {'title': 'User profile', 'profile': profile, 'is_me': True, 'is_student': False}
 
+    if request.user.profile.notifications.exists():
+        news = True
+        for n in request.user.profile.notifications.all():
+            news = news and not n.read
+        ctx['news'] = news
+    else:
+        ctx['news'] = False
+
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
     elif request.user.groups.filter(name='Teachers').exists():
@@ -101,3 +109,9 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         profile = get_object_or_404(Profile, user=self.request.user)
         return get_object_or_404(Teacher, profile=profile)
+
+
+def get_news(request):
+    notifications = request.user.profile.notifications.all()
+
+    return render(request, template_name='user_profile/news_list.html', context={'title': 'View notifications', 'news': notifications})
