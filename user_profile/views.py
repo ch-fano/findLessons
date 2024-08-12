@@ -1,14 +1,14 @@
 from django.http import Http404
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from reservation.models import Lesson, Rating
-from .models import Profile, Teacher
+from .models import *
 from .forms import ProfileForm, TeacherForm
 
 # Create your views here.view
@@ -111,7 +111,18 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
         return get_object_or_404(Teacher, profile=profile)
 
 
-def get_news(request):
+def get_notifications(request):
     notifications = request.user.profile.notifications.all()
+    for n in notifications:
+        n.read = True
 
-    return render(request, template_name='user_profile/news_list.html', context={'title': 'View notifications', 'news': notifications})
+    ctx = {'title': 'View notifications', 'news': notifications}
+
+    return render(request, template_name='user_profile/news_list.html', context=ctx)
+
+
+@login_required
+def delete_notification(request, pk):
+    Notification.objects.get(pk=pk).delete()
+    return redirect('user_profile:view-notification')
+

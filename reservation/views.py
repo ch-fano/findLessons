@@ -1,8 +1,7 @@
-from datetime import timedelta, datetime, time
+from datetime import datetime, time
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
-from django.utils import timezone
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -256,15 +255,15 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         # teacher notification
         Notification.objects.create(
             profile=availability.teacher.profile,
-            message=f'Booked a new {subject} lesson on {availability.date} from {self.request.user.profile.first_name} '
-                    f'{self.request.user.profile.last_name}',
+            message=f'Booked a new {subject} lesson on {availability.date.strftime("%B %d, %Y, %I:%M %p")} '
+                    f'from {self.request.user.profile.first_name} {self.request.user.profile.last_name}',
         )
 
         # student notification
         Notification.objects.create(
             profile=self.request.user.profile,
-            message=f'Booked a new {subject} lesson on {availability.date} with {availability.teacher.profile.first_name} '
-                    f'{availability.teacher.profile.last_name}',
+            message=f'Booked a new {subject} lesson on {availability.date.strftime("%B %d, %Y, %I:%M %p")} '
+                    f'with {availability.teacher.profile.first_name} {availability.teacher.profile.last_name}',
         )
         return super().form_valid(form)
 
@@ -293,15 +292,16 @@ class LessonUpdateView(GroupRequiredMixin, UpdateView):
         # teacher notification
         Notification.objects.create(
             profile=self.request.user.profile,
-            message=f'Updated lesson with the student {student.first_name} {student.last_name} from {old_date} to '
-                    f'{new_date}',
+            message=f'Updated lesson with the student {student.first_name} {student.last_name} from '
+                    f'{old_date.strftime("%B %d, %Y, %I:%M %p")} to {new_date.strftime("%B %d, %Y, %I:%M %p")}',
         )
 
         # student notification
         Notification.objects.create(
             profile=student,
             message=f'Updated lesson by the teacher {self.request.user.profile.first_name} '
-                    f'{self.request.user.profile.last_name} from {old_date} to {new_date}',
+                    f'{self.request.user.profile.last_name} from {old_date.strftime("%B %d, %Y, %I:%M %p")}'
+                    f' to {new_date.strftime("%B %d, %Y, %I:%M %p")}',
         )
         return super().form_valid(form)
 
@@ -320,7 +320,7 @@ def delete_lesson(request, pk, action):
     teacher_pk = lesson.teacher.pk
 
     reset_msg = ''
-    msg = f'Canceled the lesson on {lesson.date}'
+    msg = f'Canceled the lesson on {lesson.date.strftime("%B %d, %Y, %I:%M %p")}'
     student_name = lesson.student.first_name + ' ' + lesson.student.last_name + '. '
     teacher_name = lesson.teacher.profile.first_name + ' ' + lesson.teacher.profile.last_name + '. '
 

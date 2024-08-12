@@ -1,10 +1,32 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ title }} {% endblock %}
 
 {% block head %}
     {{ block.super }}
     <style>
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
         .notifications-container {
-            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
         .notification-box {
             display: flex;
@@ -42,24 +64,32 @@
         .close-button:hover {
             color: #cc0000;
         }
+        .no-news-img{
+            width: 170px;
+            height: 170px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h2>Notifications:</h2>
-    <div class="notifications-container">
-        {% for notification in news %}
-            <div class="notification-box">
-                <div class="notification-content">
-                    <p class="notification-timestamp">{{ notification.timestamp|date:"F j, Y, g:i a" }}</p>
-                    <p class="notification-message">{{ notification.message }}</p>
+
+    <input type="button" value="← Back" onClick="window.location.href='{% url 'user_profile:profile' %}';" class="btn-custom back-button">
+    <div class="page-container">
+        <div class="notifications-container">
+            <h3>Notifications:</h3>
+            {% for notification in news %}
+                <div class="notification-box">
+                    <div class="notification-content">
+                        <p class="notification-timestamp">{{ notification.timestamp|date:"F j, Y, g:i a" }}</p>
+                        <p class="notification-message">{{ notification.message }}</p>
+                    </div>
+                    <div class="notification-close">
+                        <a href="{% url 'user_profile:delete-notification' notification.id %}" class="close-button" style="text-decoration: none;">X</a>
+                    </div>
                 </div>
-                <div class="notification-close">
-                    <a href="{% url 'notification_delete_url' notification.id %}" class="close-button">X</a>
-                </div>
-            </div>
-        {% empty %}
-            <p>No new notifications.</p>
-        {% endfor %}
+            {% empty %}
+                 <img id="no-news" class="no-news-img" src="{% static 'imgs/no_news.png' %}" alt="No news">
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

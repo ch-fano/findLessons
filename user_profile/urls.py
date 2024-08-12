@@ -24,6 +24,7 @@ urlpatterns = [
     path('view/<int:pk>', view_profile, name='view-profile'),
     path('set/', ProfileUpdateView.as_view(), name='set-profile'),
     path('set/teacher/', TeacherUpdateView.as_view(), name='set-teacher'),
-    path('notification/', get_news, name='view-notification'),
+    path('notification/', get_notifications, name='view-notification'),
+    path('notification/delete/<int:pk>', delete_notification, name='delete-notification'),
 ]
 
