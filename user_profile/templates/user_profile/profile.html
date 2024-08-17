@@ -241,6 +241,17 @@
             document.getElementById('confirm-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
             document.getElementById('rating-lesson-button').style.display = 'none';
+
+            let newsGif = document.getElementById('news-gif');
+            if (newsGif) {
+                newsGif.style.display = 'none';
+            }
+
+            let newsPng = document.getElementById('news-png');
+            if (newsPng) {
+                newsPng.style.display = 'none';
+            }
+
             document.getElementById('edit-photo-button').style.display = 'block';
             document.getElementById('profile-section').classList.add('edit-mode');
 
@@ -259,6 +270,17 @@
             document.getElementById('confirm-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
             document.getElementById('rating-lesson-button').style.display = 'block';
+
+            let newsGif = document.getElementById('news-gif');
+            if (newsGif) {
+                newsGif.style.display = 'block';
+            }
+
+            let newsPng = document.getElementById('news-png');
+            if (newsPng) {
+                newsPng.style.display = 'block';
+            }
+
             document.getElementById('edit-photo-button').style.display = 'none';
             document.getElementById('profile-section').classList.remove('edit-mode');
 
