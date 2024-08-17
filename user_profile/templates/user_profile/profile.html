@@ -163,7 +163,7 @@
 {% endblock %}
 {% block content %}
     {% if not is_me %}
-        <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
+        <input type="button" value="← Back" onClick="window.location.href='{% url 'user_profile:profile' %}';" class="btn-custom back-button">
     {% endif %}
     <div class="container">
         <div class="profile-section" id="profile-section">
@@ -328,14 +328,6 @@
             }
             reader.readAsDataURL(event.target.files[0]);
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.getElementById('rating-lesson-button');
-
-            if (toggleButton) {
-                toggleButton.addEventListener('click', toggleView);
-            }
-        });
 
         // function to visualize ratings or lesson in the student profile
         function toggleView() {

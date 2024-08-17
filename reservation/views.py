@@ -145,7 +145,8 @@ def get_calendar(request, teacher_id):
         'teacher_name': teacher.profile.first_name + ' ' + teacher.profile.last_name,
         'today': today,
         'calendar_weeks': calendar_weeks,
-        'is_me': is_me
+        'is_me': is_me,
+        'teacher_profile_id': teacher.profile.pk
     }
 
     return render(request, 'reservation/calendar.html', context=ctx)

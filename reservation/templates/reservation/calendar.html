@@ -122,7 +122,7 @@
 {% endblock %}
 
 {% block content %}
-    <input type="button" value="← Back" onClick="history.go(-1);" class="back-button btn-custom">
+    <input type="button" value="← Back" onClick="window.location.href='{% if is_me %}{% url 'user_profile:profile' %}{% else %}{% url 'user_profile:view-profile' teacher_profile_id %}{% endif %}';" class="back-button btn-custom">
     <div class="calendar-header">Teacher {{ teacher_name }} availabilities:</div>
     <div class="calendar">
         {% for week in calendar_weeks %}
