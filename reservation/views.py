@@ -321,8 +321,11 @@ def delete_lesson(request, pk, action):
 
     reset_msg = ''
     msg = f'Canceled the lesson on {lesson.date.strftime("%B %d, %Y, %I:%M %p")}'
-    student_name = lesson.student.first_name + ' ' + lesson.student.last_name + '. '
-    teacher_name = lesson.teacher.profile.first_name + ' ' + lesson.teacher.profile.last_name + '. '
+    student = lesson.student
+    teacher = lesson.teacher.profile
+    student_name = student.first_name + ' ' + student.last_name + '. '
+    teacher_name = teacher.first_name + ' ' + teacher.last_name + '. '
+
 
     if action == 'reset' and lesson.date > make_aware(datetime.now()):
         availability = Availability(date=lesson.date, teacher=lesson.teacher)
@@ -335,18 +338,18 @@ def delete_lesson(request, pk, action):
 
     if request.user.groups.filter(name='Teachers').exists():
         # teacher notification
-        Notification.objects.create(profile=request.user.profile, message=msg + ' with '+student_name + reset_msg)
+        Notification.objects.create(profile=teacher, message=msg + ' with '+ student_name + reset_msg)
 
         # student notification
-        Notification.objects.create(profile=request.user.profile, message=msg + ' by ' + teacher_name)
+        Notification.objects.create(profile=student, message=msg + ' by ' + teacher_name)
 
         return redirect('reservation:availability-list', teacher_id=teacher_pk)
     else:
         # teacher notification
-        Notification.objects.create(profile=request.user.profile, message=msg + ' by ' + student_name + reset_msg)
+        Notification.objects.create(profile=teacher, message=msg + ' by ' + student_name + reset_msg)
 
         # student notification
-        Notification.objects.create(profile=request.user.profile, message=msg + ' with ' + teacher_name)
+        Notification.objects.create(profile=student, message=msg + ' with ' + teacher_name)
 
         return redirect('user_profile:profile')
 
