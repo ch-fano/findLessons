@@ -235,12 +235,17 @@
     {% block js %}{% endblock %}
     <script>
         function showEditForms() {
+
             document.getElementById('edit-profile-form').style.display = 'block';
             document.getElementById('profile-details').style.display = 'none';
             document.getElementById('edit-button').style.display = 'none';
             document.getElementById('confirm-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
-            document.getElementById('rating-lesson-button').style.display = 'none';
+
+            let ratingLessonButton = document.getElementById('rating-lesson-button');
+            if(ratingLessonButton){
+                ratingLessonButton.style.display = 'none';
+            }
 
             let newsGif = document.getElementById('news-gif');
             if (newsGif) {
@@ -269,7 +274,11 @@
             document.getElementById('edit-button').style.display = 'block';
             document.getElementById('confirm-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
-            document.getElementById('rating-lesson-button').style.display = 'block';
+
+            let ratingLessonButton = document.getElementById('rating-lesson-button');
+            if(ratingLessonButton){
+                ratingLessonButton.style.display = 'block';
+            }
 
             let newsGif = document.getElementById('news-gif');
             if (newsGif) {
