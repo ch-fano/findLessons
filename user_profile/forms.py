@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 
-from user_profile.models import Profile, Teacher
+from user_profile.models import Profile, Teacher, Request
 
 
 class ProfileForm(forms.ModelForm):
@@ -42,3 +42,15 @@ class TeacherForm(forms.ModelForm):
     class Meta:
         model = Teacher
         fields = ['city', 'subjects', 'price']
+
+class RequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RequestForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'request_form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Send request'))
+
+    class Meta:
+        model = Request
+        fields = ['first_name', 'last_name', 'email', 'identification']

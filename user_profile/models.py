@@ -53,3 +53,11 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'Notification for {self.profile.first_name} {self.profile.last_name}: {self.message}'
+
+class Request(models.Model):
+    username = models.CharField(max_length=150)
+    password = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField()
+    identification = models.ImageField(upload_to='ID_imgs')

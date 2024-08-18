@@ -217,8 +217,7 @@ class AvailabilityDeleteView(GroupRequiredMixin, DeleteView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
-
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher.pk})
 
 class LessonDetailView(GroupRequiredMixin, DetailView):
     group_required = ['Teachers', 'Students']

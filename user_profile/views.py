@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic.edit import UpdateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -9,7 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from reservation.models import Lesson, Rating
 from .models import *
-from .forms import ProfileForm, TeacherForm
+from .forms import ProfileForm, TeacherForm, RequestForm
 
 # Create your views here.view
 
@@ -126,3 +126,39 @@ def delete_notification(request, pk):
     Notification.objects.get(pk=pk).delete()
     return redirect('user_profile:view-notification')
 
+
+class RequestCreateView(CreateView):
+    model = Request
+    form_class = RequestForm
+    template_name = 'your_template.html'
+    success_url = reverse_lazy('homepage')
+
+    def get(self, request, *args, **kwargs):
+        # Check if teacher_username and teacher_password are present in session
+        if 'teacher_username' not in request.session or 'teacher_password' not in request.session:
+            messages.error(request, 'Teacher credentials are missing. Please log in again.')
+            return redirect('login')  # Redirect to login or an appropriate page
+
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # Get the credentials from the session
+        username = self.request.session.get('teacher_username')
+        password = self.request.session.get('teacher_password')
+
+        if not username or not password:
+            messages.error(self.request, 'Teacher credentials are missing. Please log in again.')
+            return redirect('login')  # Redirect to login or an appropriate page
+
+        # Set the credentials to the form instance and save the request
+        request_instance = form.save(commit=False)
+        request_instance.username = username
+        request_instance.password = password
+        request_instance.save()
+
+        # Clear session data after saving
+        self.request.session.pop('teacher_username', None)
+        self.request.session.pop('teacher_password', None)
+
+        # Proceed to the success URL
+        return super().form_valid(form)

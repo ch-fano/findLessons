@@ -21,10 +21,11 @@ from .views import *
 app_name = 'user_profile'
 urlpatterns = [
     path('', profile_home, name='profile'),
-    path('view/<int:pk>', view_profile, name='view-profile'),
+    path('view/<int:pk>/', view_profile, name='view-profile'),
     path('set/', ProfileUpdateView.as_view(), name='set-profile'),
     path('set/teacher/', TeacherUpdateView.as_view(), name='set-teacher'),
     path('notification/', get_notifications, name='view-notification'),
-    path('notification/delete/<int:pk>', delete_notification, name='delete-notification'),
+    path('notification/delete/<int:pk>/', delete_notification, name='delete-notification'),
+    path('request/', RequestCreateView.as_view(), name='make-request'),
 ]
 
