@@ -83,7 +83,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = Profile
     title = 'Update Profile'
     form_class = ProfileForm
-    template_name = 'user_profile/profile_teacher_update.html'
+    template_name = 'user_profile/profile_teacher_request_update.html'
 
     def get_success_url(self):
         if self.request.user.groups.filter(name='Teachers').exists():
@@ -103,7 +103,7 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
     model = Teacher
     title = 'Update Teacher'
     form_class = TeacherForm
-    template_name = 'user_profile/profile_teacher_update.html'
+    template_name = 'user_profile/profile_teacher_request_update.html'
     success_url = reverse_lazy('user_profile:profile')
 
     def get_object(self, queryset=None):
@@ -130,35 +130,29 @@ def delete_notification(request, pk):
 class RequestCreateView(CreateView):
     model = Request
     form_class = RequestForm
-    template_name = 'your_template.html'
+    title = 'Registration request'
+    template_name = 'user_profile/profile_teacher_request_update.html'
     success_url = reverse_lazy('homepage')
 
     def get(self, request, *args, **kwargs):
-        # Check if teacher_username and teacher_password are present in session
         if 'teacher_username' not in request.session or 'teacher_password' not in request.session:
-            messages.error(request, 'Teacher credentials are missing. Please log in again.')
-            return redirect('login')  # Redirect to login or an appropriate page
+            return redirect('login')
 
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # Get the credentials from the session
         username = self.request.session.get('teacher_username')
         password = self.request.session.get('teacher_password')
 
         if not username or not password:
-            messages.error(self.request, 'Teacher credentials are missing. Please log in again.')
-            return redirect('login')  # Redirect to login or an appropriate page
+            return redirect('login')
 
-        # Set the credentials to the form instance and save the request
         request_instance = form.save(commit=False)
         request_instance.username = username
         request_instance.password = password
         request_instance.save()
 
-        # Clear session data after saving
         self.request.session.pop('teacher_username', None)
         self.request.session.pop('teacher_password', None)
 
-        # Proceed to the success URL
         return super().form_valid(form)
