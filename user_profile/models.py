@@ -3,6 +3,9 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import models
 from PIL import Image
+from cryptography.fernet import Fernet
+from django.conf import settings  # To access settings.ENCRYPTION_KEY
+
 
 
 # Create your models here.
@@ -56,13 +59,23 @@ class Notification(models.Model):
 
 class Request(models.Model):
     username = models.CharField(max_length=150)
-    password = models.CharField(max_length=150)
+    encrypted_password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField()
     identification = models.ImageField(upload_to='ID_imgs')
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    # Encrypt the password using the key from settings
+    def set_password(self, raw_password):
+        fernet = Fernet(settings.ENCRYPTION_KEY.encode())
+        encrypted_password = fernet.encrypt(raw_password.encode())
+        self.encrypted_password = encrypted_password.decode()
+
+    # Decrypt the password using the key from settings
+    def get_password(self):
+        fernet = Fernet(settings.ENCRYPTION_KEY.encode())
+        return fernet.decrypt(self.encrypted_password.encode()).decode()
 
     def __str__(self):
         return 'ID: ' + str(self.pk) + ' -> Request from ' + self.first_name + ' ' + self.last_name + ' ' + str(self.email)

@@ -11,6 +11,8 @@ crispy-bootstrap4 = "*"
 django-braces = "*"
 django-bootstrap-datepicker-plus = "*"
 django-tempus-dominus = "*"
+python-decouple = "*"
+cryptography = "*"
 
 [dev-packages]
 

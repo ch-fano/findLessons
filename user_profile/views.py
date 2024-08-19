@@ -149,7 +149,7 @@ class RequestCreateView(CreateView):
 
         request_instance = form.save(commit=False)
         request_instance.username = username
-        request_instance.password = password
+        request_instance.set_password(password)
         request_instance.save()
 
         self.request.session.pop('teacher_username', None)
