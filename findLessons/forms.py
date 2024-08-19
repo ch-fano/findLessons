@@ -31,8 +31,6 @@ class CreateUserForm(UserCreationForm):
 
         if self.cleaned_data['user_type'] == 'student':
             group = Group.objects.get(name="Students")
-        else:
-            group = Group.objects.get(name='Teachers')
+            group.user_set.add(user)
 
-        group.user_set.add(user)
         return user

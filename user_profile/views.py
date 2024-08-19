@@ -1,6 +1,7 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.contrib.auth.models import Group
 from django.views.generic import UpdateView, CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from braces.views import GroupRequiredMixin
@@ -167,3 +168,34 @@ class RequestDetailView(UserPassesTestMixin, DetailView):
 
     def test_func(self):
         return self.request.user.is_superuser
+
+@login_required
+def delete_request(request, pk, action):
+
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Superuser permission needed")
+    if action not in ['accept', 'reject']:
+        return HttpResponseBadRequest("Invalid action parameter")
+
+    teacher_request = get_object_or_404(Request, pk=pk)
+
+    if action == 'accept':
+        user = User(username=teacher_request.username)
+        user.set_password(teacher_request.get_password())
+        user.save()
+
+        teachers_group = Group.objects.get(name='Teachers')
+        user.groups.add(teachers_group)
+
+        user.profile.first_name = teacher_request.first_name
+        user.profile.last_name = teacher_request.last_name
+        user.profile.email = teacher_request.email
+        user.profile.save()
+
+    # Delete the ID for privacy reasons
+    if teacher_request.identification:
+        teacher_request.identification.delete(save=False)
+
+    teacher_request.delete()
+
+    return redirect('user_profile:profile')

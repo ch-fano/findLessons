@@ -103,8 +103,8 @@
             </div>
 
             <div class="button-container">
-                <button type="button" class="btn btn-danger" id="rejectButton">Reject</button>
-                <button type="button" class="btn-custom" id="acceptButton">Accept</button>
+                <a href="{% url 'user_profile:request-delete' request.pk "reject" %}" class="btn-custom btn-danger" style="text-decoration: none;">Reject</a>
+                <a href="{% url 'user_profile:request-delete' request.pk "accept" %}" class="btn-custom" style="text-decoration: none;">Accept</a>
             </div>
         </div>
     </div>

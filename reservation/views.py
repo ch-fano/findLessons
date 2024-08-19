@@ -1,7 +1,7 @@
 from datetime import datetime, time
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.timezone import make_aware
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -357,7 +357,7 @@ def delete_lesson(request, pk, action):
 @login_required
 def create_update_rating(request, teacher_id):
     if request.user.groups.filter(name='Teachers').exists():
-        return HttpResponseBadRequest("Teacher can't rate other teachers")
+        return HttpResponseForbidden("Teacher can't rate other teachers")
 
     teacher = get_object_or_404(Teacher, pk=teacher_id)
 

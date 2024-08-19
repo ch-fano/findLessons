@@ -222,6 +222,10 @@
                         <div class="button-row" id="edit-buttons">
                             <button id="rating-lesson-button" class="btn btn-info">Show votes</button>
                         </div>
+                    {% elif is_admin%}
+                        <div class="button-row" id="edit-buttons">
+                            <a href="/admin/" class="btn-custom" style="text-decoration: none;">Go to admin panel</a>
+                        </div>
                     {% endif %}
                 {% endif %}
                 <div class="button-container" id="confirm-container" style="display:none;">
