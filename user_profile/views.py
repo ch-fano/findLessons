@@ -17,7 +17,7 @@ from .forms import ProfileForm, TeacherForm, RequestForm
 @login_required
 def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
-    ctx = {'title': 'User profile', 'profile': profile, 'is_me': True, 'is_student': False}
+    ctx = {'title': 'User profile', 'profile': profile, 'is_me': True, 'is_student': False, 'is_admin':False}
 
     if request.user.profile.notifications.exists():
         news = True
@@ -30,6 +30,7 @@ def profile_home(request):
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
         ctx['requests'] = Request.objects.all()
+        ctx['is_admin'] = True
     elif request.user.groups.filter(name='Teachers').exists():
         template = 'user_profile/teacher_profile.html'
         teacher = get_object_or_404(Teacher, profile=profile)
@@ -66,7 +67,7 @@ def profile_home(request):
 def view_profile(request, pk):
 
     profile = get_object_or_404(Profile, pk=pk)
-    ctx = {'title': 'View profile', 'profile': profile, 'is_me': False}
+    ctx = {'title': 'View profile', 'profile': profile, 'is_me': False, 'is_admin': False}
 
     if profile.user.is_superuser:
         raise Http404
