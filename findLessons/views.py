@@ -39,7 +39,7 @@ class UserCreateView(CreateView):
             self.request.session['teacher_username'] = form.cleaned_data.get('username')
             self.request.session['teacher_password'] = form.cleaned_data.get('password1')
 
-            return redirect(reverse_lazy('user_profile:make-request'))
+            return redirect(reverse_lazy('user_profile:request-create'))
 
         else:
             user = form.save(commit=True)

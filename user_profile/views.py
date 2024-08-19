@@ -1,8 +1,8 @@
 from django.http import Http404
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic.edit import UpdateView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import UpdateView, CreateView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
@@ -29,6 +29,7 @@ def profile_home(request):
 
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'
+        ctx['requests'] = Request.objects.all()
     elif request.user.groups.filter(name='Teachers').exists():
         template = 'user_profile/teacher_profile.html'
         teacher = get_object_or_404(Teacher, profile=profile)
@@ -156,3 +157,12 @@ class RequestCreateView(CreateView):
         self.request.session.pop('teacher_password', None)
 
         return super().form_valid(form)
+
+
+class RequestDetailView(UserPassesTestMixin, DetailView):
+    model = Request
+    title = 'View request'
+    template_name = 'user_profile/request_detail.html'
+
+    def test_func(self):
+        return self.request.user.is_superuser

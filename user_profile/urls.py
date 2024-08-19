@@ -26,6 +26,8 @@ urlpatterns = [
     path('set/teacher/', TeacherUpdateView.as_view(), name='set-teacher'),
     path('notification/', get_notifications, name='view-notification'),
     path('notification/delete/<int:pk>/', delete_notification, name='delete-notification'),
-    path('request/', RequestCreateView.as_view(), name='make-request'),
+    path('request/<int:pk>/', RequestDetailView.as_view(), name='request-detail'),
+    path('request/create/', RequestCreateView.as_view(), name='request-create'),
+    #path('request/delete/<int:pk>/<str:action>/', RequestCreateView.as_view(), name='request-delete'),
 ]
 

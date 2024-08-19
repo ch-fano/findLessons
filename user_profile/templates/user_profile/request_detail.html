@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ view.title }} {% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <style>
+        .full-page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            text-align: center;
+            position: relative;
+        }
+
+        .detail-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 90%;
+            max-width: 1000px;
+            padding: 30px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .id-picture {
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            max-width: 600px;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 1.2em;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-danger {
+            margin-top: 10px;
+            background-color: #dc3545;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-custom.align {
+            top: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="full-page-container">
+        <input type="button" value="← Back" onClick="window.location.href='{% url 'user_profile:profile' %}'" class="btn-custom back-button align">
+
+        <div class="detail-container">
+            <div class="details">
+                <div class="info">
+                    <p class="request-timestamp">{{ object.timestamp|date:"F j, Y, g:i a" }}</p>
+                    <p class="request-info">
+                        <strong>Name: </strong>{{ object.first_name }} {{ object.last_name }} <br>
+                        <strong>Email: </strong>{{ object.email }} <br>
+                    </p>
+                </div>
+                <img src="{{ object.identification.url }}" alt="{{ object.first_name }} {{ object.last_name }}" class="id-picture">
+            </div>
+
+            <div class="button-container">
+                <button type="button" class="btn btn-danger" id="rejectButton">Reject</button>
+                <button type="button" class="btn-custom" id="acceptButton">Accept</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,14 +1,79 @@
 {% extends 'user_profile/profile.html' %}
 
-{% block info %}
-    <p> Admin </p>
-    <div class="list">
-        <ul>
-            <li>Example Item 1</li>
-            <li>Example Item 2</li>
-            <li>Example Item 3</li>
-            <li>Example Item 4</li>
-        </ul>
-    </div>
+{% block head %}
+    {{ block.super }}
 
+    <style>
+        .info-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+        }
+        .request-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.3s, display 0s 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+        .request-box.visible {
+            opacity: 1;
+            display: flex;
+            transition: opacity 0.3s;
+        }
+        .request-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .request-timestamp {
+            font-size: 0.9em;
+            color: #666666;
+            margin-bottom: 5px;
+        }
+        .request-info {
+            font-size: 1.1em;
+            color: #333333;
+        }
+        .request-id {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
+
+{% endblock %}
+
+{% block info %}
+    <div class="list">
+        <h2 id="header-title">Requests:</h2>
+        <div class="info-container" id="requests-container">
+            {% for request in requests %}
+                <div class="request-box visible" tabindex="0">
+                    <div class="request-content">
+                        <p class="request-timestamp">{{ request.timestamp|date:"F j, Y, g:i a" }}</p>
+                        <p class="request-info">
+                            <strong>Name: </strong>{{ request.first_name }} {{ request.last_name }} <br>
+                            <strong>Email: </strong>{{ request.email }} <br>
+                        </p>
+                    </div>
+                    <div class="request-id">
+                        <a href="{% url 'user_profile:request-detail' request.pk %}" class="btn-custom" style="text-decoration: none;">View ID</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
