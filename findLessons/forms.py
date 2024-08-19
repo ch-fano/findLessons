@@ -5,6 +5,11 @@ from django import forms
 
 
 class CreateUserForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'usable_password' in self.fields:
+            del self.fields['usable_password']
+
     USER_TYPE_CHOICES = [
         ('student', 'Student'),
         ('teacher', 'Teacher'),

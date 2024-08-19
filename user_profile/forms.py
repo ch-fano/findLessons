@@ -54,3 +54,6 @@ class RequestForm(forms.ModelForm):
     class Meta:
         model = Request
         fields = ['first_name', 'last_name', 'email', 'identification']
+        labels = {
+            'identification': 'Insert a picture of your identification document',
+        }
