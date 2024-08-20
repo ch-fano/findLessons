@@ -57,6 +57,7 @@ class Notification(models.Model):
     def __str__(self):
         return f'Notification for {self.profile.first_name} {self.profile.last_name}: {self.message}'
 
+
 class Request(models.Model):
     username = models.CharField(max_length=150)
     encrypted_password = models.CharField(max_length=255)

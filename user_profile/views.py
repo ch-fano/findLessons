@@ -21,11 +21,12 @@ def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
     ctx = {'title': 'User profile', 'profile': profile, 'is_me': True, 'is_student': False, 'is_admin':False}
 
-    if request.user.profile.notifications.exists():
+    notifications = request.user.profile.notifications.all()
+    if notifications.exists():
         news = True
-        for n in request.user.profile.notifications.all():
-            news = news and not n.read
-        ctx['news'] = news
+        for n in notifications:
+            news = news and n.read
+        ctx['news'] = not news
     else:
         ctx['news'] = False
 
@@ -119,6 +120,7 @@ def get_notifications(request):
     notifications = request.user.profile.notifications.all()
     for n in notifications:
         n.read = True
+        n.save()
 
     ctx = {'title': 'View notifications', 'news': notifications}
 
