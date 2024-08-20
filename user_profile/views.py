@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.mail import send_mail
 
 from reservation.models import Lesson, Rating
 from .models import *
@@ -179,6 +180,12 @@ def delete_request(request, pk, action):
 
     teacher_request = get_object_or_404(Request, pk=pk)
 
+    subject = 'FindLessons: outcome of the registration request'
+    message = (f'Hello {teacher_request.first_name}, \nwe are sorry but your registration request was rejected.'
+               f'\n\nBest regards, \nFindLessons team.')
+    from_email = 'findlessons2024@gmail.com'
+    recipient_list = [teacher_request.email]
+
     if action == 'accept':
         user = User(username=teacher_request.username)
         user.set_password(teacher_request.get_password())
@@ -192,10 +199,16 @@ def delete_request(request, pk, action):
         user.profile.email = teacher_request.email
         user.profile.save()
 
+        message = (f'Hello {teacher_request.first_name}, \nWe are pleased to announce that your registration request '
+               f'has been accepted.\nYou can now log in to your account with the following username: '
+                   f'{teacher_request.username}\n\nBest regards, \nFindLessons team.')
+
     # Delete the ID for privacy reasons
     if teacher_request.identification:
         teacher_request.identification.delete(save=False)
 
     teacher_request.delete()
+
+    send_mail(subject, message, from_email, recipient_list)
 
     return redirect('user_profile:profile')
