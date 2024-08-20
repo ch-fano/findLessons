@@ -334,22 +334,27 @@ def delete_lesson(request, pk, action):
     elif action != 'reset' and action != 'noreset':
         return HttpResponseBadRequest("Invalid action parameter")
 
+    send_notification = (make_aware(datetime.now()) <= lesson.date)
     lesson.delete()
 
     if request.user.groups.filter(name='Teachers').exists():
-        # teacher notification
-        Notification.objects.create(profile=teacher, message=msg + ' with '+ student_name + reset_msg)
 
-        # student notification
-        Notification.objects.create(profile=student, message=msg + ' by ' + teacher_name)
+        if send_notification:
+            # teacher notification
+            Notification.objects.create(profile=teacher, message=msg + ' with '+ student_name + reset_msg)
+
+            # student notification
+            Notification.objects.create(profile=student, message=msg + ' by ' + teacher_name)
 
         return redirect('reservation:availability-list', teacher_id=teacher_pk)
     else:
-        # teacher notification
-        Notification.objects.create(profile=teacher, message=msg + ' by ' + student_name + reset_msg)
 
-        # student notification
-        Notification.objects.create(profile=student, message=msg + ' with ' + teacher_name)
+        if send_notification:
+            # teacher notification
+            Notification.objects.create(profile=teacher, message=msg + ' by ' + student_name + reset_msg)
+
+            # student notification
+            Notification.objects.create(profile=student, message=msg + ' with ' + teacher_name)
 
         return redirect('user_profile:profile')
 
