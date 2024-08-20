@@ -224,7 +224,7 @@
                         </div>
                     {% elif is_admin%}
                         <div class="button-row" id="edit-buttons">
-                            <a href="/admin/" class="btn-custom" style="text-decoration: none;">Go to admin panel</a>
+                            <a href="{% url 'admin:index' %}" class="btn-custom" style="text-decoration: none;">Go to admin panel</a>
                         </div>
                     {% endif %}
                 {% endif %}
