@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
 from django.core.files import File
-from user_profile.models import Profile, Teacher
+from user_profile.models import Profile, Teacher, Request, Notification
 from reservation.models import Lesson, Availability, Rating
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -26,17 +26,23 @@ class Command(BaseCommand):
         Lesson.objects.all().delete()
         Availability.objects.all().delete()
         Rating.objects.all().delete()
+        Notification.objects.all().delete()
+        Request.objects.all().delete()
 
     def delete_imgs(self):
-        imgs_path = './././media/profile_imgs'
+        dirs = ['./././media/profile_imgs', './././media/ID_imgs']
 
-        for img in os.listdir(imgs_path):
-            os.remove(os.path.join(imgs_path, img))
+        for imgs_path in dirs:
+            for img in os.listdir(imgs_path):
+                os.remove(os.path.join(imgs_path, img))
 
-    def get_future_date(self, hour):
+    def get_random_date(self, hour, future=True):
         days = random.randint(0, 14)
-        future_date = datetime.now() + timedelta(days=days)
-        return timezone.make_aware(future_date.replace(hour=hour, minute=00, second=0, microsecond=0))
+        if future:
+            date = datetime.now() + timedelta(days=days)
+        else:
+            date = datetime.now() - timedelta(days=days)
+        return timezone.make_aware(date.replace(hour=hour, minute=00, second=0, microsecond=0))
 
     def set_profile(self, user, name, surname, photo_path):
         profile = Profile.objects.get(user=user)
@@ -70,7 +76,7 @@ class Command(BaseCommand):
         hours = [10, 12, 14, 17, 19]
 
         for _ in range(random.randint(2, 7)):
-            date = self.get_future_date(random.choice(hours))
+            date = self.get_random_date(random.choice(hours))
 
             if not Availability.objects.filter(teacher=user.profile.teacher, date=date).exists():
                 availability = Availability(teacher=user.profile.teacher, date=date)
@@ -79,8 +85,12 @@ class Command(BaseCommand):
     def set_lesson(self, student, teacher):
         hours = [8, 11, 15, 16, 18]
 
-        for _ in range(random.randint(1, 3)):
-            date = self.get_future_date(random.choice(hours))
+        for _ in range(random.randint(1, 5)):
+            if random.random() <= 0.3:
+                date = self.get_random_date(random.choice(hours), future=False)
+            else:
+                date = self.get_random_date(random.choice(hours), future=True)
+
             subject = random.choice(teacher.subjects.replace(',', '').split())
 
             if (not Lesson.objects.filter(teacher=teacher, date=date).exists() and
@@ -92,6 +102,25 @@ class Command(BaseCommand):
         if not Rating.objects.filter(student=student, teacher=teacher).exists():
             rating = Rating(student=student, teacher=teacher, stars=random.randint(0, 5))
             rating.save()
+
+    def set_request(self):
+        users_dict = {
+            'username': ['bianca.rossi', 'valentino.blu'],
+            'first_name': ['Bianca', 'Valentino'],
+            'last_name': ['Rossi', 'Blu'],
+            'email': ['bianca.rossi@gmail.com', 'valentino.blu@gmail.com'],
+            'ID': ['./././static/init_imgs/ID/ID_female.png', './././static/init_imgs/ID/ID_male.png']
+        }
+
+        for i in range(2):
+            request = Request(username=users_dict['username'][i], first_name=users_dict['first_name'][i],
+                             last_name=users_dict['last_name'][i], email=users_dict['email'][i])
+
+            with open(users_dict['ID'][i], 'rb') as image_file:
+                request.identification.save(os.path.basename(users_dict['ID'][i]), File(image_file))
+
+            request.set_password('superciao')
+            request.save()
 
     def init_db(self):
         if len(User.objects.all()) != 1:
@@ -151,4 +180,6 @@ class Command(BaseCommand):
                 student_user = random.choice(students)
                 self.set_lesson(student_user.profile, teacher_user.profile.teacher)
                 self.set_rating(student_user.profile, teacher_user.profile.teacher)
+
+        self.set_request()
 
