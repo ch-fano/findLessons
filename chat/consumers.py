@@ -63,13 +63,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_chat(self, chat_name):
         pk = int(chat_name.replace('chat_', ''))
-        print(Chat.objects.get(pk=pk))
         return Chat.objects.get(pk=pk)
 
     @database_sync_to_async
     def get_profile(self, username):
-        print(username)
-        print(User.objects.get(username=username).profile)
         return User.objects.get(username=username).profile
 
     @database_sync_to_async

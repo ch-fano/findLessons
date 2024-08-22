@@ -16,6 +16,7 @@ cryptography = "*"
 channels = "*"
 channels-redis = "*"
 daphne = "*"
+redis = "*"
 
 [dev-packages]
 
