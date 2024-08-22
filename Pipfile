@@ -17,6 +17,7 @@ channels = "*"
 channels-redis = "*"
 daphne = "*"
 redis = "*"
+whitenoise = "*"
 
 [dev-packages]
 

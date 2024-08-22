@@ -2,14 +2,112 @@
 
 {% block title %}Chat{% endblock %}
 
+{% block head %}
+    <style>
+        .chat-container {
+            display: flex;
+            height: 80vh;
+        }
+
+        .chat-list {
+            width: 25%;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-item img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .chat-item div {
+            flex: 1;
+        }
+
+        .chat-item a {
+            text-decoration: none;
+            color: #000;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-messages {
+            width: 75%;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-log {
+            flex: 1;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        #chat-message-input {
+            margin-top: 10px;
+            width: calc(100% - 80px);
+            height: 50px;
+        }
+
+        #chat-message-submit {
+            margin-top: 10px;
+            width: 60px;
+            height: 50px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <div id="chat-log">
-        {% for message in messages %}
-            <b>{{ message.sender.user.username }}</b>: {{ message.content }}<br>
-        {% endfor %}
+    <div class="chat-container">
+        <!-- Chat list section -->
+        <div class="chat-list">
+            <h2>Chats</h2>
+            {% for chat in chats %}
+                <a href="{% url 'chat:chat-start' chat.other_participant.id %}">
+                    <div class="chat-item">
+                        <img src="{{ chat.other_participant.picture.url }}" alt="Profile Picture">
+                        <div>
+                            {% if chat.other_participant.first_name and chat.other_participant.last_name %}
+                                {{ chat.other_participant.first_name }} {{ chat.other_participant.last_name }}
+                            {% else %}
+                                {{ chat.other_participant.user.username }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <p>No chats available</p>
+            {% endfor %}
+        </div>
+
+        <div class="chat-messages">
+            <div id="chat-log">
+                {% for message in messages %}
+                    <b>{{ message.sender.user.username }}</b>: {{ message.content }}<br>
+                {% endfor %}
+            </div>
+            <label>
+                <textarea id="chat-message-input" type="text"></textarea>
+            </label>
+            <button id="chat-message-submit">Send</button>
+        </div>
     </div>
-    <textarea id="chat-message-input" type="text"></textarea>
-    <button id="chat-message-submit">Send</button>
 
     <script>
         const chatName = "{{ chat_name }}";

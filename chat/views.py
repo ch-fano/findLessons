@@ -6,6 +6,12 @@ from user_profile.models import Profile
 
 # Create your views here.
 
+def get_chats(profile):
+    chats = []
+    for chat in profile.chats.all():
+        chats.append({'id': chat.pk, 'other_participant': chat.get_other_participant(profile)})
+    return chats
+
 @login_required
 def start_chat(request, dest_pk):
     sender = request.user.profile
@@ -25,13 +31,20 @@ def start_chat(request, dest_pk):
 
 @login_required
 def chat_view(request, pk):
-    chat = get_object_or_404(Chat, pk=pk)
+    current_chat = get_object_or_404(Chat, pk=pk)
 
-    if request.user.profile not in chat.participants.all():
+    if request.user.profile not in current_chat.participants.all():
         return HttpResponseForbidden('You can only access to your chat')
 
-    messages = chat.messages.all()
+    messages = current_chat.messages.all()
 
-    return render(request, 'chat/chat.html', {'chat': chat,
-                                              'chat_name': chat.chat_name(),
-                                              'messages': messages})
+    chats = get_chats(request.user.profile)
+
+    ctx = {'chat_name': current_chat.chat_name(),'messages': messages, 'chats': chats}
+    return render(request, 'chat/chat.html', ctx)
+
+@login_required
+def chat_home(request):
+    chats = get_chats(request.user.profile)
+
+    return render(request, 'chat/chat.html', {'chats': chats, 'chat_name': '', 'messages': []})

@@ -159,6 +159,14 @@
             height: 50px;
             z-index: 10;
         }
+        .chat-img {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            z-index: 10;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -174,6 +182,11 @@
                     {% else %}
                         <img id="news-png" class="notification-png" src="{% static 'imgs/newspaper.png' %}" alt="View notification">
                     {% endif %}
+                </a>
+            {% endif %}
+            {% if not is_admin %}
+                <a href="{% if is_me %}{% url 'chat:chat-home' %}{% else %}{% url 'chat:chat-start' profile.id %}{% endif %}" style="text-decoration: none;">
+                    <img id="chat-img" class="chat-img" src="{% static 'imgs/chat.png' %}" alt="Chat png">
                 </a>
             {% endif %}
             <div class="profile-image" id="profile-image">

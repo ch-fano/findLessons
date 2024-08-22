@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from user_profile.models import Profile
 
@@ -8,7 +9,17 @@ class Chat(models.Model):
     participants = models.ManyToManyField(Profile, related_name='chats')
 
     def chat_name(self):
-        return f"chat_{self.pk}"
+        return f'chat_{self.pk}'
+
+    def get_other_participant(self, profile):
+        try:
+            other_participant = self.participants.exclude(pk=profile.pk).first()
+            if other_participant:
+                return other_participant
+            else:
+                return 'Unknown'
+        except ObjectDoesNotExist:
+            return 'Unknown'
 
     def __str__(self):
         return 'Chat between ' + ','.join([profile.user.username for profile in self.participants.all()])
