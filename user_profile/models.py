@@ -4,9 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from PIL import Image
 from cryptography.fernet import Fernet, InvalidToken
-from django.conf import settings  # To access settings.ENCRYPTION_KEY
-
-
+from django.conf import settings
 
 # Create your models here.
 
