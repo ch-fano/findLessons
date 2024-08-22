@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import models
 from PIL import Image
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings  # To access settings.ENCRYPTION_KEY
 
 
@@ -75,8 +75,11 @@ class Request(models.Model):
 
     # Decrypt the password using the key from settings
     def get_password(self):
-        fernet = Fernet(settings.ENCRYPTION_KEY.encode())
-        return fernet.decrypt(self.encrypted_password.encode()).decode()
+        try:
+            fernet = Fernet(settings.ENCRYPTION_KEY.encode())
+            return fernet.decrypt(self.encrypted_password.encode()).decode()
+        except InvalidToken:
+            return "Invalid token or corrupted data"
 
     def __str__(self):
         return 'ID: ' + str(self.pk) + ' -> Request from ' + self.first_name + ' ' + self.last_name + ' ' + str(self.email)

@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'channels'
 ]
 
-ASGI_APPLICATION = 'chat.asgi.application'
+ASGI_APPLICATION = 'findLessons.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {

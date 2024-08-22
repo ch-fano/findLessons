@@ -3,13 +3,16 @@
 {% block title %}Chat{% endblock %}
 
 {% block content %}
-
-    <div id="chat-log"></div>
+    <div id="chat-log">
+        {% for message in messages %}
+            <b>{{ message.sender.user.username }}</b>: {{ message.content }}<br>
+        {% endfor %}
+    </div>
     <textarea id="chat-message-input" type="text"></textarea>
     <button id="chat-message-submit">Send</button>
 
     <script>
-        const chatName = "{{ chat.name }}";
+        const chatName = "{{ chat_name }}";
         const username = "{{ request.user.username }}";
         const chatSocket = new WebSocket(
             'ws://' + window.location.host + '/ws/chat/' + chatName + '/'
@@ -41,5 +44,4 @@
             messageInputDom.value = '';
         };
     </script>
-
 {% endblock %}

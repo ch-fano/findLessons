@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.core.files import File
 from user_profile.models import Profile, Teacher, Request, Notification
 from reservation.models import Lesson, Availability, Rating
+from chat.models import Chat, Message
 from datetime import datetime, timedelta
 from django.utils import timezone
 import random
@@ -28,6 +29,8 @@ class Command(BaseCommand):
         Rating.objects.all().delete()
         Notification.objects.all().delete()
         Request.objects.all().delete()
+        Chat.objects.all().delete()
+        Message.objects.all().delete()
 
     def delete_imgs(self):
         dirs = ['./././media/profile_imgs', './././media/ID_imgs']
