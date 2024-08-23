@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Chat{% endblock %}
 
 {% block head %}
-    <style>
+   <style>
+        .align-link-profile {
+            margin-right: 40px;
+        }
+
         .chat-container {
             display: flex;
-            height: 80vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .chat-list {
@@ -14,6 +20,7 @@
             border-right: 1px solid #ddd;
             padding: 10px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .chat-item {
@@ -24,6 +31,9 @@
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            justify-content: space-between;
+            text-decoration: none;
+            color: black;
         }
 
         .chat-item img {
@@ -35,13 +45,7 @@
 
         .chat-item div {
             flex: 1;
-        }
-
-        .chat-item a {
-            text-decoration: none;
-            color: #000;
-            display: flex;
-            align-items: center;
+            text-align: center;
         }
 
         .chat-messages {
@@ -50,6 +54,35 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+            margin-right: 0;
+        }
+
+        .receiver-info {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+        }
+
+        .receiver-info img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .receiver-info div {
+            flex: 1;
+        }
+
+        .receiver-info .delete-img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
         }
 
         #chat-log {
@@ -59,60 +92,95 @@
             padding-bottom: 10px;
         }
 
+        .message-input-container {
+            position: fixed;
+            bottom: 0;
+            left: 25%;
+            width: 75%;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
         #chat-message-input {
-            margin-top: 10px;
-            width: calc(100% - 80px);
+            flex: 1;
             height: 50px;
+            margin-right: 10px;
+            resize: none;
         }
 
         #chat-message-submit {
-            margin-top: 10px;
             width: 60px;
             height: 50px;
+        }
+
+        .bell-img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="chat-container">
-        <!-- Chat list section -->
         <div class="chat-list">
             <h2>Chats</h2>
             {% for chat in chats %}
-                <a href="{% url 'chat:chat-start' chat.other_participant.id %}">
-                    <div class="chat-item">
-                        <img src="{{ chat.other_participant.picture.url }}" alt="Profile Picture">
-                        <div>
-                            {% if chat.other_participant.first_name and chat.other_participant.last_name %}
-                                {{ chat.other_participant.first_name }} {{ chat.other_participant.last_name }}
-                            {% else %}
-                                {{ chat.other_participant.user.username }}
-                            {% endif %}
-                        </div>
+                <div class="chat-item" onclick="location.href='{% url 'chat:chat-start' chat.other_participant.id %}'">
+                   <img src="{{ chat.other_participant.picture.url }}" class="chat-img" alt="Profile Picture">
+                    <div>
+                        {% if chat.other_participant.first_name and chat.other_participant.last_name %}
+                            {{ chat.other_participant.first_name }} {{ chat.other_participant.last_name }}
+                        {% else %}
+                            {{ chat.other_participant.user.username }}
+                        {% endif %}
                     </div>
-                </a>
+                    {% if chat.new_messages %}
+                        <img src="{% static 'imgs/bell.png' %}" class="bell-img" alt="New message">
+                    {% endif %}
+                </div>
             {% empty %}
                 <p>No chats available</p>
             {% endfor %}
         </div>
 
         <div class="chat-messages">
+            {% if receiver %}
+                <div class="receiver-info">
+                    <a href="{% url 'user_profile:view-profile' receiver.id %}?source=chat">
+                        <img src="{{ receiver.picture.url }}" alt="Receiver Picture">
+                    </a>
+                    <div>
+                        {% if receiver.first_name and receiver.last_name %}
+                            <strong>{{ receiver.first_name }} {{ receiver.last_name }}</strong>
+                        {% else %}
+                            {{ receiver.user.username }}
+                        {% endif %}
+                    </div>
+                    <img src="{% static 'imgs/delete.png' %}" class="delete-img" alt="Delete">
+                </div>
+            {% endif %}
             <div id="chat-log">
                 {% for message in messages %}
                     <b>{{ message.sender.user.username }}</b>: {{ message.content }}<br>
                 {% endfor %}
             </div>
-            <label>
-                <textarea id="chat-message-input" type="text"></textarea>
-            </label>
-            <button id="chat-message-submit">Send</button>
         </div>
+    </div>
+
+    <div class="message-input-container">
+        <textarea id="chat-message-input" type="text"></textarea>
+        <button id="chat-message-submit">Send</button>
     </div>
 
     <script>
         const chatName = "{{ chat_name }}";
         const username = "{{ request.user.username }}";
-        if (chatName!=="None") {
+        if (chatName !== "None") {
             const chatSocket = new WebSocket(
                 'ws://' + window.location.host + '/ws/chat/' + chatName + '/'
             );
@@ -144,4 +212,10 @@
             };
         }
     </script>
+{% endblock %}
+
+{% block bar %}
+    <a href="{% url 'user_profile:profile' %}" class="link-profile-image align-link-profile">
+        <img src="{{ user.profile.picture.url }}" alt="Link-profile">
+    </a>
 {% endblock %}
