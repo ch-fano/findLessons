@@ -118,6 +118,9 @@
         justify-content: center;
         margin-top: 15px;
     }
+    .align-link-profile{
+        margin-right: 40px;
+    }
 </style>
 {% endblock %}
 
@@ -185,4 +188,20 @@
             });
         });
     </script>
+{% endblock %}
+
+{% block bar %}
+    {% if user.is_authenticated %}
+        <a href="{% url 'user_profile:profile' %}" class="link-profile-image align-link-profile">
+            <img src="{{ user.profile.picture.url }}" alt="Link-profile">
+        </a>
+    {% else %}
+        <form id="login-form" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <a href="{% url 'login' %}" class="login">
+                Log in
+            </a>
+        </form>
+        {{ form.media }}
+    {% endif %}
 {% endblock %}

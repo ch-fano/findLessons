@@ -2,21 +2,6 @@
 {% load crispy_forms_filters %}
 
 {% block title %} {{title}} {% endblock %}
-{% block bar %} 
-    {% if user.is_authenticated %}
-        <a href="{% url 'user_profile:profile' %}" class="profile-image">
-            <img src="{{ profile.picture.url }}" alt="Profile">
-        </a>
-    {% else %}
-        <form id="login-form" method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            <a href="{% url 'login' %}" class="login">
-                Log in
-            </a>
-        </form>
-        {{ form.media }}
-    {% endif %}
-{% endblock %}
 
 {% block head %}
     {{ block.super }}
