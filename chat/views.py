@@ -47,4 +47,4 @@ def chat_view(request, pk):
 def chat_home(request):
     chats = get_chats(request.user.profile)
 
-    return render(request, 'chat/chat.html', {'chats': chats, 'chat_name': '', 'messages': []})
+    return render(request, 'chat/chat.html', {'chats': chats, 'chat_name': 'None', 'messages': []})
