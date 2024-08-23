@@ -70,7 +70,8 @@ def profile_home(request):
 def view_profile(request, pk):
 
     profile = get_object_or_404(Profile, pk=pk)
-    ctx = {'title': 'View profile', 'profile': profile, 'is_me': False, 'is_admin': False}
+    use_history = True if request.GET.get('source', None) else False
+    ctx = {'title': 'View profile', 'profile': profile, 'is_me': False, 'is_admin': False, 'use_history': use_history}
 
     if profile.user.is_superuser:
         raise Http404

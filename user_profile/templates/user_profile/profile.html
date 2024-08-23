@@ -171,7 +171,7 @@
 {% endblock %}
 {% block content %}
     {% if not is_me %}
-        <input type="button" value="← Back" onClick="window.location.href='{% url 'user_profile:profile' %}';" class="btn-custom back-button">
+        <input type="button" value="← Back" onClick="{% if use_history %}history.go(-1);{% else %}window.location.href='{% url 'user_profile:profile' %}';{% endif %}" class="btn-custom back-button">
     {% endif %}
     <div class="container">
         <div class="profile-section" id="profile-section">
@@ -185,9 +185,15 @@
                 </a>
             {% endif %}
             {% if not is_admin %}
-                <a href="{% if is_me %}{% url 'chat:chat-home' %}{% else %}{% url 'chat:chat-start' profile.id %}{% endif %}" style="text-decoration: none;">
-                    <img id="chat-img" class="chat-img" src="{% static 'imgs/chat.png' %}" alt="Chat png">
-                </a>
+                {% if is_me %}
+                    <a href="{% url 'chat:chat-home' %}" style="text-decoration: none;">
+                        <img id="chat-img" class="chat-img" src="{% static 'imgs/chat.png' %}" alt="Chat png">
+                    </a>
+                {% else %}
+                    <a href="{% url 'chat:chat-start' profile.id %}" style="text-decoration: none;">
+                        <img id="write-img" class="chat-img" src="{% static 'imgs/write.png' %}" alt="Write png">
+                    </a>
+                {% endif %}
             {% endif %}
             <div class="profile-image" id="profile-image">
                 <img id="profile-pic" src="{{ profile.picture.url }}" alt="Profile Image">
