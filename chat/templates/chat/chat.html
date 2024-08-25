@@ -35,17 +35,16 @@
             text-decoration: none;
             color: black;
         }
+        .chat-item div {
+            flex: 1;
+            text-align: center;
+        }
 
-        .chat-item img {
+        .chat-item-img {
             border-radius: 50%;
             width: 40px;
             height: 40px;
             margin-right: 10px;
-        }
-
-        .chat-item div {
-            flex: 1;
-            text-align: center;
         }
 
         .chat-messages {
@@ -57,6 +56,7 @@
             flex: 1;
             overflow-y: auto;
             margin-right: 0;
+            padding-bottom: 70px;
         }
 
         .receiver-info {
@@ -90,6 +90,26 @@
             overflow-y: auto;
             border-bottom: 1px solid #ddd;
             padding-bottom: 10px;
+        }
+
+        .message-box {
+            max-width: 60%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            color: white;
+            text-align: left;
+        }
+
+        .message-box.sent {
+            background-color: lightseagreen;
+            margin-left: auto;
+        }
+
+        .message-box.received {
+            background-color: lightslategray;
+            margin-right: auto;
         }
 
         .message-input-container {
@@ -131,7 +151,7 @@
             <h2>Chats</h2>
             {% for chat in chats %}
                 <div class="chat-item" onclick="location.href='{% url 'chat:chat-start' chat.other_participant.id %}'">
-                   <img src="{{ chat.other_participant.picture.url }}" class="chat-img" alt="Profile Picture">
+                   <img src="{{ chat.other_participant.picture.url }}" class="chat-item-img" alt="Profile Picture">
                     <div>
                         {% if chat.other_participant.first_name and chat.other_participant.last_name %}
                             {{ chat.other_participant.first_name }} {{ chat.other_participant.last_name }}
@@ -168,16 +188,19 @@
             {% endif %}
             <div id="chat-log">
                 {% for message in messages %}
-                    <b>{{ message.sender.user.username }}</b>: {{ message.content }}<br>
+                    <div class="message-box {% if message.sender == request.user.profile %}sent{% else %}received{% endif %}">
+                        {{ message.content }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-
-    <div class="message-input-container">
-        <textarea id="chat-message-input" type="text"></textarea>
-        <button id="chat-message-submit">Send</button>
-    </div>
+    {% if receiver %}
+        <div class="message-input-container">
+            <textarea id="chat-message-input" type="text"></textarea>
+            <button id="chat-message-submit">Send</button>
+        </div>
+    {% endif %}
 
     <script>
         const chatName = "{{ chat_name }}";
@@ -189,7 +212,9 @@
 
             chatSocket.onmessage = function (e) {
                 const data = JSON.parse(e.data);
-                document.querySelector('#chat-log').innerHTML += '<b>' + data.username + '</b>: ' + data.message + '<br>';
+                const messageClass = data.username === username ? 'sent' : 'received';
+                document.querySelector('#chat-log').innerHTML +=
+                    '<div class="message-box ' + messageClass + '"><b>' + data.username + '</b>: ' + data.message + '</div>';
             };
 
             chatSocket.onclose = function (e) {
