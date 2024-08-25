@@ -21,7 +21,7 @@ class Chat(models.Model):
         except ObjectDoesNotExist:
             return 'Unknown'
 
-    def has_new_messages(self, profile, ):
+    def has_new_messages(self, profile):
         sender = self.get_other_participant(profile)
         return self.messages.filter(sender=sender, read=False).exists()
 

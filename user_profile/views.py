@@ -15,7 +15,6 @@ from .forms import ProfileForm, TeacherForm, RequestForm
 
 # Create your views here.view
 
-
 @login_required
 def profile_home(request):
     profile = get_object_or_404(Profile, user=request.user)
@@ -29,6 +28,11 @@ def profile_home(request):
         ctx['news'] = not news
     else:
         ctx['news'] = False
+
+    chat_news = False
+    for chat in profile.chats.all():
+        chat_news = chat_news or chat.has_new_messages(profile)
+    ctx['chat_news'] = chat_news
 
     if request.user.is_superuser:
         template = 'user_profile/admin_profile.html'

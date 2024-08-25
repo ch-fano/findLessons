@@ -167,6 +167,14 @@
             height: 50px;
             z-index: 10;
         }
+        .chat-news-img{
+            position: absolute;
+            top: 12px;
+            right: 10px;
+            width: 90px;
+            height: 90px;
+            z-index: 10;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -186,9 +194,15 @@
             {% endif %}
             {% if not is_admin %}
                 {% if is_me %}
-                    <a href="{% url 'chat:chat-home' %}" style="text-decoration: none;">
-                        <img id="chat-img" class="chat-img" src="{% static 'imgs/chat.png' %}" alt="Chat png">
-                    </a>
+                    {% if chat_news %}
+                        <a href="{% url 'chat:chat-home' %}" style="text-decoration: none;">
+                            <img id="chat-news-img" class="chat-news-img" src="{% static 'imgs/chat_news.png' %}" alt="Chat news png">
+                        </a>
+                    {% else %}
+                        <a href="{% url 'chat:chat-home' %}" style="text-decoration: none;">
+                            <img id="chat-img" class="chat-img" src="{% static 'imgs/chat.png' %}" alt="Chat png">
+                        </a>
+                    {% endif %}
                 {% else %}
                     <a href="{% url 'chat:chat-start' profile.id %}" style="text-decoration: none;">
                         <img id="write-img" class="chat-img" src="{% static 'imgs/write.png' %}" alt="Write png">
@@ -280,6 +294,16 @@
                 newsPng.style.display = 'none';
             }
 
+            let chatNewsImg = document.getElementById('chat-news-img');
+            if (chatNewsImg) {
+                chatNewsImg.style.display = 'none';
+            }
+
+            let chatImg = document.getElementById('chat-img');
+            if (chatImg) {
+                chatImg.style.display = 'none';
+            }
+
             document.getElementById('edit-photo-button').style.display = 'block';
             document.getElementById('profile-section').classList.add('edit-mode');
 
@@ -311,6 +335,16 @@
             let newsPng = document.getElementById('news-png');
             if (newsPng) {
                 newsPng.style.display = 'block';
+            }
+
+            let chatNewsImg = document.getElementById('chat-news-img');
+            if (chatNewsImg) {
+                chatNewsImg.style.display = 'block';
+            }
+
+            let chatImg = document.getElementById('chat-img');
+            if (chatImg) {
+                chatImg.style.display = 'block';
             }
 
             document.getElementById('edit-photo-button').style.display = 'none';
