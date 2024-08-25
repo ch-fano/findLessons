@@ -161,7 +161,9 @@
                             {{ receiver.user.username }}
                         {% endif %}
                     </div>
-                    <img src="{% static 'imgs/delete.png' %}" class="delete-img" alt="Delete">
+                    <a href="{% url 'chat:chat-delete' current_chat_id %}">
+                        <img src="{% static 'imgs/delete.png' %}" class="delete-img" alt="Delete">
+                    </a>
                 </div>
             {% endif %}
             <div id="chat-log">

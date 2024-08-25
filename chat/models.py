@@ -46,3 +46,8 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender.user.username}: {self.content[:20]}"
+
+class Visibility(models.Model):
+    chat = models.ForeignKey(Chat, related_name='visibility', on_delete=models.CASCADE)
+    participant = models.ForeignKey(Profile, related_name='visibility', on_delete=models.CASCADE)
+    visible = models.BooleanField(default=True)
