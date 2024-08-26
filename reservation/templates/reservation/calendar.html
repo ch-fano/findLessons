@@ -121,6 +121,19 @@
     .align-link-profile{
         margin-right: 40px;
     }
+    .btn-danger {
+        margin-top: 10px;
+        background-color: #dc3545;
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #dc3545;
+    }
 </style>
 {% endblock %}
 
@@ -142,7 +155,7 @@
                                             {% if event.is_future %}
                                                 {% if is_me %}
                                                     <a href="{% url 'reservation:availability-update' event.id %}" class="btn-custom change-button" style="text-decoration: none;">Change</a>
-                                                    <a href="{% url 'reservation:availability-delete' event.id %}" class="btn-custom delete-button" style="text-decoration: none;">Delete</a>
+                                                    <a href="{% url 'reservation:availability-delete' event.id %}" class="btn-custom delete-button btn-danger" style="text-decoration: none;">Delete</a>
                                                 {% else %}
                                                     <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom" style="text-decoration: none;">Book lesson</a>
                                                 {% endif %}
