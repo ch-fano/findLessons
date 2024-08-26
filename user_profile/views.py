@@ -84,7 +84,13 @@ def view_profile(request, pk):
         teacher = get_object_or_404(Teacher, profile=profile)
         ctx['teacher'] = teacher
     else:
-        template = 'user_profile/student_profile.html'
+        template = 'user_profile/view_student_profile.html'
+        ctx['today'] = timezone.now()
+
+        if request.user.groups.filter(name='Teachers').exists():
+            ctx['lessons'] = Lesson.objects.all().filter(student=profile, teacher=request.user.profile.teacher).order_by('date')
+        else:
+            ctx['lessons'] = []
 
     return render(request, template_name=template, context=ctx)
 

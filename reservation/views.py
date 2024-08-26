@@ -323,6 +323,8 @@ def delete_lesson(request, pk, action):
     lesson = get_object_or_404(Lesson, pk=pk)
     teacher_pk = lesson.teacher.pk
 
+    from_student_view = True if request.GET.get('from', None) else False
+
     reset_msg = ''
     msg = f'Canceled the lesson on {lesson.date.strftime("%B %d, %Y, %I:%M %p")}'
     student = lesson.student
@@ -349,6 +351,9 @@ def delete_lesson(request, pk, action):
 
             # student notification
             Notification.objects.create(profile=student, message=msg + ' by ' + teacher_name)
+
+        if from_student_view:
+            return redirect('user_profile:view-profile', pk=student.pk)
 
         return redirect('reservation:availability-list', teacher_id=teacher_pk)
     else:
