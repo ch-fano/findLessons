@@ -94,15 +94,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     title = 'Update Profile'
     form_class = ProfileForm
     template_name = 'user_profile/profile_teacher_request_update.html'
-
-    def get_success_url(self):
-        if self.request.user.groups.filter(name='Teachers').exists():
-
-            # if not edited go to the teacher form
-            if len(self.request.user.profile.teacher.city) == 0:
-                return reverse_lazy('user_profile:set-teacher')
-
-        return reverse_lazy('user_profile:profile')
+    success_url = reverse_lazy('user_profile:profile')
 
     def get_object(self, queryset=None):
         return get_object_or_404(Profile, user=self.request.user)

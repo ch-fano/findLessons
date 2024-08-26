@@ -33,9 +33,9 @@ class Profile(models.Model):
 
 class Teacher(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
-    subjects = models.CharField(max_length=100)
+    subjects = models.CharField(max_length=255, default='Insert subjects comma separated')
     city = models.CharField(max_length=30)
-    price = models.IntegerField(null=True,validators=[
+    price = models.IntegerField(default=0,validators=[
             MinValueValidator(0, message=_('Value must be greater than or equal to 0'))])
     stars = models.FloatField(default=0, validators=[
             MinValueValidator(0.0, message=_('Value must be greater than or equal to 0.0')),
