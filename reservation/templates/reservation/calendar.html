@@ -139,20 +139,24 @@
                                     <li class="availability">
                                         {{ event.time }}
                                         <div class="action-buttons">
-                                            {% if is_me %}
-                                                <a href="{% url 'reservation:availability-update' event.id %}" class="btn-custom change-button" style="text-decoration: none;">Change</a>
-                                                <a href="{% url 'reservation:availability-delete' event.id %}" class="btn-custom delete-button" style="text-decoration: none;">Delete</a>
-                                            {% else %}
-                                                <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom" style="text-decoration: none;">Book lesson</a>
+                                            {% if event.is_future %}
+                                                {% if is_me %}
+                                                    <a href="{% url 'reservation:availability-update' event.id %}" class="btn-custom change-button" style="text-decoration: none;">Change</a>
+                                                    <a href="{% url 'reservation:availability-delete' event.id %}" class="btn-custom delete-button" style="text-decoration: none;">Delete</a>
+                                                {% else %}
+                                                    <a href="{% url 'reservation:lesson-create' event.id %}" class="btn-custom" style="text-decoration: none;">Book lesson</a>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                     </li>
                                 {% else %}
                                     <li class="lesson">
                                         {{ event.time }} - {{ event.subject }}
-                                        <div class="action-buttons">
-                                            <a href="{% url 'reservation:lesson-view' event.id %}" class="btn-custom" style="text-decoration: none;">View lesson</a>
-                                        </div>
+                                        {% if event.is_future %}
+                                            <div class="action-buttons">
+                                                <a href="{% url 'reservation:lesson-view' event.id %}" class="btn-custom" style="text-decoration: none;">View lesson</a>
+                                            </div>
+                                        {% endif %}
                                     </li>
                                 {% endif %}
                             {% endfor %}

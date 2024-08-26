@@ -74,7 +74,9 @@ def get_calendar(request, teacher_id):
     is_me = (teacher.profile == request.user.profile) if request.user.is_authenticated else False
 
     today = make_aware(datetime.now())
-    start_date = today - timedelta(days=today.weekday())  # Start of this week (Monday)
+    today_midnight= datetime.combine(today, time.min)
+
+    start_date = today_midnight - timedelta(days=today.weekday())  # Start of this week (Monday)
     end_date = start_date + timedelta(days=20)  # 3 weeks of days (3 weeks * 7 days - 1 day)
 
     # Filter availability for the calculated range
@@ -94,7 +96,8 @@ def get_calendar(request, teacher_id):
         events_by_date[date_str].append({
             'type': 'availability',
             'time': time_str,
-            'id': availability.id
+            'id': availability.id,
+            'is_future': availability.date >= today,
         })
 
     if is_me:
@@ -114,7 +117,8 @@ def get_calendar(request, teacher_id):
                 'type': 'lesson',
                 'time': time_str,
                 'subject': lesson.subject,
-                'id': lesson.id
+                'id': lesson.id,
+                'is_future': lesson.date >= today,
             })
 
     # Sort events within each date
@@ -143,7 +147,7 @@ def get_calendar(request, teacher_id):
     ctx = {
         'title': 'Show availabilities',
         'teacher_name': teacher.profile.first_name + ' ' + teacher.profile.last_name,
-        'today': today,
+        'today': today_midnight,
         'calendar_weeks': calendar_weeks,
         'is_me': is_me,
         'teacher_profile_id': teacher.profile.pk
@@ -240,7 +244,7 @@ class LessonCreateView(GroupRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         availability = self.get_availability()
         kwargs['date'] = availability.date
-        teacher_availabilities = Availability.objects.filter(teacher=availability.teacher)
+        teacher_availabilities = Availability.objects.filter(teacher=availability.teacher, date__gte=make_aware(datetime.now())).order_by('date')
         kwargs['teacher_availabilities'] = [a.date for a in teacher_availabilities]
         kwargs['teacher_subjects'] = availability.teacher.subjects.replace(',', '').split()
         return kwargs
