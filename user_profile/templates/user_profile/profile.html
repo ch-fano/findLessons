@@ -251,16 +251,19 @@
                             <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
                         </form>
                     </div>
-                    <div class="button-row" id="edit-buttons">
-                        <a href="{% url 'change-password' %}" class="btn-custom" id="password-button" style="text-decoration: none;">Change password</a>
-                    </div>
                     {% if is_student %}
                         <div class="button-row" id="edit-buttons">
+                            <a href="{% url 'change-password' %}" class="btn-custom" id="password-button" style="text-decoration: none;">Change password</a>
                             <button id="rating-lesson-button" class="btn btn-info">Show votes</button>
                         </div>
                     {% elif is_admin%}
                         <div class="button-row" id="edit-buttons">
-                            <a href="{% url 'admin:index' %}" class="btn-custom" style="text-decoration: none;">Go to admin panel</a>
+                            <a href="{% url 'change-password' %}" class="btn-custom" id="password-button" style="text-decoration: none;">Change password</a>
+                            <a href="{% url 'admin:index' %}" class="btn-custom" id="admin-button" style="text-decoration: none;">Go to admin panel</a>
+                        </div>
+                    {% else %}
+                        <div class="button-row" id="edit-buttons">
+                            <a href="{% url 'change-password' %}" class="btn-custom" id="password-button" style="text-decoration: none;">Change password</a>
                         </div>
                     {% endif %}
                 {% endif %}
@@ -286,6 +289,11 @@
             let ratingLessonButton = document.getElementById('rating-lesson-button');
             if(ratingLessonButton){
                 ratingLessonButton.style.display = 'none';
+            }
+
+            let adminButton = document.getElementById('admin-button');
+            if(adminButton){
+                adminButton.style.display = 'none';
             }
 
             let newsGif = document.getElementById('news-gif');
@@ -330,6 +338,11 @@
             let ratingLessonButton = document.getElementById('rating-lesson-button');
             if(ratingLessonButton){
                 ratingLessonButton.style.display = 'block';
+            }
+
+            let adminButton = document.getElementById('admin-button');
+            if(adminButton){
+                adminButton.style.display = 'block';
             }
 
             let newsGif = document.getElementById('news-gif');
