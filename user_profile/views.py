@@ -2,6 +2,7 @@ from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth.models import Group
+from django.utils.crypto import get_random_string
 from django.views.generic import UpdateView, CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from braces.views import GroupRequiredMixin
@@ -164,6 +165,11 @@ class RequestCreateView(CreateView):
         self.request.session.pop('teacher_username', None)
         self.request.session.pop('teacher_password', None)
 
+        # create a temporary user to keep the username
+        user = User(username=username)
+        user.set_password(get_random_string(length=12))
+        user.save()
+
         return super().form_valid(form)
 
 
@@ -191,8 +197,9 @@ def delete_request(request, pk, action):
     from_email = 'findlessons2024@gmail.com'
     recipient_list = [teacher_request.email]
 
+    user = User.objects.get(username=teacher_request.username)
+
     if action == 'accept':
-        user = User(username=teacher_request.username)
         user.set_password(teacher_request.get_password())
         user.save()
 
@@ -207,6 +214,8 @@ def delete_request(request, pk, action):
         message = (f'Hello {teacher_request.first_name}, \nWe are pleased to announce that your registration request '
                f'has been accepted.\nYou can now log in to your account with the following username: '
                    f'{teacher_request.username}\n\nBest regards, \nFindLessons team.')
+    else:
+        user.delete()
 
     # Delete the ID for privacy reasons
     if teacher_request.identification:

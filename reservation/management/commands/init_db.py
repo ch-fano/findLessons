@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
 from django.core.files import File
+from django.utils.crypto import get_random_string
+
 from user_profile.models import Profile, Teacher, Request, Notification
 from reservation.models import Lesson, Availability, Rating
 from chat.models import Chat, Message, Visibility
@@ -125,6 +127,11 @@ class Command(BaseCommand):
 
             request.set_password('superciao')
             request.save()
+
+            # create a temporary user to keep the username
+            user = User(username=users_dict['username'][i])
+            user.set_password(get_random_string(length=12))
+            user.save()
 
     def init_db(self):
         if len(User.objects.all()) != 1:
