@@ -251,6 +251,9 @@
                             <button type="submit" class="btn btn-secondary" id="logout-button">Logout</button>
                         </form>
                     </div>
+                    <div class="button-row" id="edit-buttons">
+                        <a href="{% url 'change-password' %}" class="btn-custom" id="password-button" style="text-decoration: none;">Change password</a>
+                    </div>
                     {% if is_student %}
                         <div class="button-row" id="edit-buttons">
                             <button id="rating-lesson-button" class="btn btn-info">Show votes</button>
@@ -278,6 +281,7 @@
             document.getElementById('edit-button').style.display = 'none';
             document.getElementById('confirm-container').style.display = 'flex';
             document.getElementById('logout-button').style.display = 'none';
+            document.getElementById('password-button').style.display = 'none';
 
             let ratingLessonButton = document.getElementById('rating-lesson-button');
             if(ratingLessonButton){
@@ -321,6 +325,7 @@
             document.getElementById('edit-button').style.display = 'block';
             document.getElementById('confirm-container').style.display = 'none';
             document.getElementById('logout-button').style.display = 'block';
+            document.getElementById('password-button').style.display = 'block';
 
             let ratingLessonButton = document.getElementById('rating-lesson-button');
             if(ratingLessonButton){

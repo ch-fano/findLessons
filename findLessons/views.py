@@ -1,3 +1,6 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -46,3 +49,11 @@ class UserCreateView(CreateView):
             form.save_m2m()  # Save many-to-many relationships, like adding the user to a group
 
             return redirect(reverse_lazy('login'))
+
+class CustomPasswordChangeView(LoginRequiredMixin,PasswordChangeView):
+    template_name = 'change_password.html'
+    success_url = reverse_lazy('user_profile:profile')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your password was changed successfully.")
+        return super().form_valid(form)
