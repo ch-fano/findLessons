@@ -5,6 +5,12 @@
 
 {% block head %}
    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
         .align-link-profile {
             margin-right: 40px;
         }
@@ -111,7 +117,7 @@
             overflow: hidden;
             margin-right: 0;
             padding: 10px 10px 70px;
-            background-color: #f9f9e3;
+            background-color: #dee1f8;
             overflow-y: auto;
         }
 
@@ -121,6 +127,7 @@
             border-bottom: 1px solid #ddd;
             padding-bottom: 10px;
             max-height: calc(100vh - 160px);
+            margin-bottom:60px;
         }
 
 
@@ -247,7 +254,7 @@
         </div>
     {% endif %}
 
-   <script>
+    <script>
         const chatName = "{{ chat_name }}";
         const username = "{{ request.user.username }}";
         let chatSocket;
@@ -263,6 +270,7 @@
                     const messageClass = data.username === username ? 'sent' : 'received';
                     document.querySelector('#chat-log').innerHTML +=
                         '<div class="message-box ' + messageClass + '">' + data.message + '</div>';
+                    scrollToBottom();  // Scroll to the bottom after a new message
                 };
 
                 chatSocket.onclose = function (e) {
@@ -295,6 +303,9 @@
 
                 // Initialize button state
                 toggleSendButton();
+
+                // Scroll to bottom on initial load
+                scrollToBottom();
             }
         }
 
@@ -304,8 +315,15 @@
             }
         }
 
+        // Function to scroll chat log to the bottom
+        function scrollToBottom() {
+            const chatLog = document.querySelector('#chat-log');
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
         // Setup WebSocket connection
         setupWebSocket();
+        scrollToBottom();
 
         // Ensure WebSocket is closed before the page unloads
         window.addEventListener('beforeunload', function () {
