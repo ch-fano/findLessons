@@ -20,9 +20,12 @@
             border-right: 1px solid #ddd;
             padding: 10px;
             box-sizing: border-box;
-            overflow-y: auto;
+            overflow-y: auto; /* Add this */
             position: relative;
+            height: calc(100vh - 60px); /* Adjust height to account for any header/footer if present */
+            max-height: 100%; /* Ensure the container doesn't exceed its parent */
         }
+
 
         .chat-list h2 {
             position: relative;
