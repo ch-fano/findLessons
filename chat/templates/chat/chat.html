@@ -271,6 +271,13 @@
                     document.querySelector('#chat-log').innerHTML +=
                         '<div class="message-box ' + messageClass + '">' + data.message + '</div>';
                     scrollToBottom();  // Scroll to the bottom after a new message
+
+                    if (data.username !== username) {
+                        chatSocket.send(JSON.stringify({
+                            'mark_read': true,
+                            'message_id': data.message_id
+                        }));
+                    }
                 };
 
                 chatSocket.onclose = function (e) {
@@ -330,9 +337,6 @@
             closeWebSocket();
         });
 
-        setInterval(function () {
-            location.reload();
-        }, 30000);  // 30000 milliseconds = 30 seconds
     </script>
 
 {% endblock %}

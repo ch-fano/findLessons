@@ -32,32 +32,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         if text_data:
             data = json.loads(text_data)
-            message = data['message']
-            username = data['username']
+            message = data.get('message')
+            username = data.get('username')
+            mark_read = data.get('mark_read', False)
+            message_id = data.get('message_id')
 
-            # Save the message to the database
-            chat = await self.get_chat(self.chat_name)
-            sender = await self.get_profile(username)
-            await self.save_message(chat, sender, message)
+            if message:
+                # Save the message to the database
+                chat = await self.get_chat(self.chat_name)
+                sender = await self.get_profile(username)
+                message_obj = await self.save_message(chat, sender, message)
 
-            # Send message to chat group
-            await self.channel_layer.group_send(
-                self.chat_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': message,
-                    'username': username
-                }
-            )
+                # Send message to chat group
+                await self.channel_layer.group_send(
+                    self.chat_group_name,
+                    {
+                        'type': 'chat_message',
+                        'message': message,
+                        'username': username,
+                        'message_id': message_obj.id
+                    }
+                )
+
+            if mark_read and message_id:
+                # Mark specific message as read
+                await self.mark_message_as_read(message_id)
 
     async def chat_message(self, event):
         message = event['message']
         username = event['username']
+        message_id = event['message_id']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
-            'username': username
+            'username': username,
+            'message_id': message_id
         }))
 
     @database_sync_to_async
@@ -72,3 +82,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_message(self, chat, sender, content):
         return Message.objects.create(chat=chat, sender=sender, content=content)
+
+    @database_sync_to_async
+    def mark_message_as_read(self, message_id):
+        try:
+            message = Message.objects.get(id=message_id)
+            message.read = True
+            message.save()
+        except Message.DoesNotExist:
+            pass
