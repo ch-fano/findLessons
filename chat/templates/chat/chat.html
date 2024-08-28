@@ -124,6 +124,14 @@
             background-color: #fff;
             border-top: 1px solid #ddd;
         }
+        .message-input-container button{
+            font-size: 1em;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
         #chat-message-input {
             flex: 1;
@@ -197,7 +205,7 @@
     </div>
     {% if receiver %}
         <div class="message-input-container">
-            <textarea id="chat-message-input" type="text"></textarea>
+            <label for="chat-message-input"></label><textarea id="chat-message-input" type="text"></textarea>
             <button id="chat-message-submit">Send</button>
         </div>
     {% endif %}
@@ -214,7 +222,7 @@
                 const data = JSON.parse(e.data);
                 const messageClass = data.username === username ? 'sent' : 'received';
                 document.querySelector('#chat-log').innerHTML +=
-                    '<div class="message-box ' + messageClass + '"><b>' + data.username + '</b>: ' + data.message + '</div>';
+                    '<div class="message-box ' + messageClass + '">' + data.message + '</div>';
             };
 
             chatSocket.onclose = function (e) {
