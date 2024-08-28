@@ -21,6 +21,22 @@
             padding: 10px;
             box-sizing: border-box;
             overflow-y: auto;
+            position: relative;
+        }
+
+        .chat-list h2 {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .chat-list h2 img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .chat-item {
@@ -138,6 +154,8 @@
             height: 50px;
             margin-right: 10px;
             resize: none;
+            background-color: #fff;
+            outline: none;
         }
 
         #chat-message-submit {
@@ -156,7 +174,10 @@
 {% block content %}
     <div class="chat-container">
         <div class="chat-list">
-            <h2>Chats</h2>
+            <h2>
+                Chats
+                <img src="{% static 'imgs/refresh.png' %}" onclick="location.reload()" alt="Refresh">
+            </h2>
             {% for chat in chats %}
                 <div class="chat-item" onclick="location.href='{% url 'chat:chat-start' chat.other_participant.id %}'">
                    <img src="{{ chat.other_participant.picture.url }}" class="chat-item-img" alt="Profile Picture">
@@ -213,40 +234,63 @@
     <script>
         const chatName = "{{ chat_name }}";
         const username = "{{ request.user.username }}";
-        if (chatName !== "None") {
-            const chatSocket = new WebSocket(
-                'ws://' + window.location.host + '/ws/chat/' + chatName + '/'
-            );
+        let chatSocket;
 
-            chatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-                const messageClass = data.username === username ? 'sent' : 'received';
-                document.querySelector('#chat-log').innerHTML +=
-                    '<div class="message-box ' + messageClass + '">' + data.message + '</div>';
-            };
+        function setupWebSocket() {
+            if (chatName !== "None") {
+                chatSocket = new WebSocket(
+                    'ws://' + window.location.host + '/ws/chat/' + chatName + '/'
+                );
 
-            chatSocket.onclose = function (e) {
-                console.error('Chat socket closed unexpectedly');
-            };
+                chatSocket.onmessage = function (e) {
+                    const data = JSON.parse(e.data);
+                    const messageClass = data.username === username ? 'sent' : 'received';
+                    document.querySelector('#chat-log').innerHTML +=
+                        '<div class="message-box ' + messageClass + '">' + data.message + '</div>';
+                };
 
-            document.querySelector('#chat-message-input').focus();
-            document.querySelector('#chat-message-input').onkeyup = function (e) {
-                if (e.keyCode === 13) {  // enter, return
-                    document.querySelector('#chat-message-submit').click();
-                }
-            };
+                chatSocket.onclose = function (e) {
+                    console.error('Chat socket closed unexpectedly');
+                };
 
-            document.querySelector('#chat-message-submit').onclick = function (e) {
-                const messageInputDom = document.querySelector('#chat-message-input');
-                const message = messageInputDom.value;
-                chatSocket.send(JSON.stringify({
-                    'message': message,
-                    'username': username
-                }));
-                messageInputDom.value = '';
-            };
+                document.querySelector('#chat-message-input').focus();
+                document.querySelector('#chat-message-input').onkeyup = function (e) {
+                    if (e.keyCode === 13) {  // enter, return
+                        document.querySelector('#chat-message-submit').click();
+                    }
+                };
+
+                document.querySelector('#chat-message-submit').onclick = function (e) {
+                    const messageInputDom = document.querySelector('#chat-message-input');
+                    const message = messageInputDom.value;
+                    chatSocket.send(JSON.stringify({
+                        'message': message,
+                        'username': username
+                    }));
+                    messageInputDom.value = '';
+                };
+            }
         }
+
+        function closeWebSocket() {
+            if (chatSocket) {
+                chatSocket.close();
+            }
+        }
+
+        // Setup WebSocket connection
+        setupWebSocket();
+
+        // Ensure WebSocket is closed before the page unloads
+        window.addEventListener('beforeunload', function () {
+            closeWebSocket();
+        });
+
+        setInterval(function () {
+            location.reload();
+        }, 30000);  // 30000 milliseconds = 30 seconds
     </script>
+
 {% endblock %}
 
 {% block bar %}
