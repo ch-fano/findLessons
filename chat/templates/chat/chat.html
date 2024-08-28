@@ -243,7 +243,7 @@
         </div>
     {% endif %}
 
-    <script>
+   <script>
         const chatName = "{{ chat_name }}";
         const username = "{{ request.user.username }}";
         let chatSocket;
@@ -265,22 +265,32 @@
                     console.error('Chat socket closed unexpectedly');
                 };
 
-                document.querySelector('#chat-message-input').focus();
-                document.querySelector('#chat-message-input').onkeyup = function (e) {
-                    if (e.keyCode === 13) {  // enter, return
-                        document.querySelector('#chat-message-submit').click();
-                    }
-                };
+                const messageInputDom = document.querySelector('#chat-message-input');
+                const sendButton = document.querySelector('#chat-message-submit');
 
-                document.querySelector('#chat-message-submit').onclick = function (e) {
-                    const messageInputDom = document.querySelector('#chat-message-input');
+                function toggleSendButton() {
+                    sendButton.disabled = messageInputDom.value.trim() === '';
+                }
+
+                messageInputDom.addEventListener('input', toggleSendButton);
+                messageInputDom.addEventListener('keyup', function (e) {
+                    if (e.keyCode === 13 && !sendButton.disabled) {  // enter, return
+                        sendButton.click();
+                    }
+                });
+
+                sendButton.addEventListener('click', function (e) {
                     const message = messageInputDom.value;
                     chatSocket.send(JSON.stringify({
                         'message': message,
                         'username': username
                     }));
                     messageInputDom.value = '';
-                };
+                    toggleSendButton(); // Disable button after sending
+                });
+
+                // Initialize button state
+                toggleSendButton();
             }
         }
 
