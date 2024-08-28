@@ -20,10 +20,10 @@
             border-right: 1px solid #ddd;
             padding: 10px;
             box-sizing: border-box;
-            overflow-y: auto; /* Add this */
+            overflow-y: auto;
             position: relative;
-            height: calc(100vh - 60px); /* Adjust height to account for any header/footer if present */
-            max-height: 100%; /* Ensure the container doesn't exceed its parent */
+            height: calc(100vh - 60px);
+            max-height: 100%;
         }
 
 
@@ -75,19 +75,6 @@
             margin-right: 10px;
         }
 
-        .chat-messages {
-            width: 75%;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow-y: auto;
-            margin-right: 0;
-            padding-bottom: 70px;
-            background-color: #f9f9e3;
-        }
-
         .receiver-info {
             display: flex;
             align-items: center;
@@ -115,13 +102,27 @@
             height: 30px;
             cursor: pointer;
         }
+        .chat-messages {
+            width: 75%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            margin-right: 0;
+            padding: 10px 10px 70px;
+            background-color: #f9f9e3;
+            overflow-y: auto;
+        }
 
         #chat-log {
             flex: 1;
             overflow-y: auto;
             border-bottom: 1px solid #ddd;
             padding-bottom: 10px;
+            max-height: calc(100vh - 160px);
         }
+
 
         .message-box {
             max-width: 60%;
