@@ -70,6 +70,7 @@ def chat_home(request):
     }
     return render(request, 'chat/chat.html', ctx)
 
+@login_required
 def chat_delete(request, pk):
     chat = get_object_or_404(Chat, pk=pk)
 

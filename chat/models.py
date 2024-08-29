@@ -12,14 +12,17 @@ class Chat(models.Model):
         return f'chat_{self.pk}'
 
     def get_other_participant(self, profile):
+        if profile is None or not self.participants.filter(pk=profile.pk).exists():
+            return None
+
         try:
             other_participant = self.participants.exclude(pk=profile.pk).first()
             if other_participant:
                 return other_participant
             else:
-                return 'Unknown'
+                return None
         except ObjectDoesNotExist:
-            return 'Unknown'
+            return None
 
     def has_new_messages(self, profile):
         sender = self.get_other_participant(profile)
