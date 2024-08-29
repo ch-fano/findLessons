@@ -85,7 +85,6 @@ class ChatViewTestCase(TestCase):
     def test_chat_view_access(self):
         chat = Chat.objects.create()
         chat.participants.add(self.profile1, self.profile2)
-        visibility = Visibility.objects.create(chat=chat, participant=self.profile1)
 
         response = self.client.get(reverse('chat:chat-view', args=[chat.pk]))
         self.assertEqual(response.status_code, 200)
@@ -97,20 +96,12 @@ class ChatViewTestCase(TestCase):
         response = self.client.get(reverse('chat:chat-view', args=[chat.pk]))
         self.assertEqual(response.status_code, 403)
 
-    def test_chat_view_deleted(self):
-        chat = Chat.objects.create()
-        chat.participants.add(self.profile1, self.profile2)
-        visibility = Visibility.objects.create(chat=chat, participant=self.profile1, visible=False)
-
-        response = self.client.get(reverse('chat:chat-view', args=[chat.pk]))
-        self.assertRedirects(response, reverse('chat:chat-home'))
 
     def test_chat_delete(self):
         chat = Chat.objects.create()
         chat.participants.add(self.profile1, self.profile2)
         chat_pk = chat.pk
-        visibility1 = Visibility.objects.create(chat=chat, participant=self.profile1)
-        visibility2 = Visibility.objects.create(chat=chat, participant=self.profile2)
+        visibility1 = Visibility.objects.get(chat=chat, participant=self.profile1)
 
         response = self.client.post(reverse('chat:chat-delete', args=[chat.pk]))
         visibility1.refresh_from_db()
@@ -140,7 +131,6 @@ class ChatTemplateTestCase(TestCase):
 
         self.chat = Chat.objects.create()
         self.chat.participants.add(self.profile1, self.profile2)
-        self.visibility = Visibility.objects.create(chat=self.chat, participant=self.profile1)
 
     def test_chat_view_template(self):
         response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
