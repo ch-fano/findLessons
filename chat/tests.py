@@ -4,8 +4,7 @@ from django.contrib.auth.models import User
 from user_profile.models import Profile
 from .models import Chat, Message, Visibility
 
-
-class ChatModelTestCase(TestCase):
+class BaseTestCase(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(username='user1', password='password')
         self.user2 = User.objects.create_user(username='user2', password='password')
@@ -15,6 +14,8 @@ class ChatModelTestCase(TestCase):
         self.chat = Chat.objects.create()
         self.chat.participants.add(self.profile1, self.profile2)
 
+
+class ChatModelTestCase(BaseTestCase):
     def test_chat_name(self):
         self.assertEqual(self.chat.chat_name(), f'chat_{self.chat.pk}')
 
@@ -42,34 +43,27 @@ class ChatModelTestCase(TestCase):
     def test_str_representation(self):
         self.assertEqual(str(self.chat), f'Chat between {self.user1.username},{self.user2.username}')
 
-class MessageModelTestCase(TestCase):
-    def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='password')
-        self.profile1 = self.user1.profile
-        self.chat = Chat.objects.create()
-        self.chat.participants.add(self.profile1)
-
+class MessageModelTestCase(BaseTestCase):
     def test_message_str_representation(self):
         message = Message.objects.create(chat=self.chat, sender=self.profile1, content="Test Message")
         self.assertEqual(str(message), f'{self.user1.username}: Test Message')
 
-class VisibilityModelTestCase(TestCase):
+class VisibilityModelTestCase(BaseTestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='password')
-        self.profile1 = self.user1.profile
-        self.chat = Chat.objects.create()
-        self.visibility = Visibility.objects.create(chat=self.chat, participant=self.profile1)
+        super().setUp()
+        self.visibility = Visibility.objects.get(participant=self.profile1)
+
+    def test_visibility_signals(self):
+        self.assertTrue(Visibility.objects.filter(chat=self.chat.pk, participant=self.profile1).exists())
+        self.assertTrue(Visibility.objects.filter(chat=self.chat.pk, participant=self.profile2).exists())
 
     def test_visibility_default(self):
         self.assertTrue(self.visibility.visible)
 
 
-class ChatViewTestCase(TestCase):
+class ChatViewTestCase(BaseTestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='password')
-        self.user2 = User.objects.create_user(username='user2', password='password')
-        self.profile1 = self.user1.profile
-        self.profile2 = self.user2.profile
+        super().setUp()
         self.client.login(username='user1', password='password')
 
     def test_start_chat(self):
@@ -121,16 +115,10 @@ class ChatViewTestCase(TestCase):
         self.assertTemplateUsed(response, 'chat/chat.html')
 
 
-class ChatTemplateTestCase(TestCase):
+class ChatTemplateTestCase(BaseTestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='password')
-        self.user2 = User.objects.create_user(username='user2', password='password')
-        self.profile1 = self.user1.profile
-        self.profile2 = self.user2.profile
+        super().setUp()
         self.client.login(username='user1', password='password')
-
-        self.chat = Chat.objects.create()
-        self.chat.participants.add(self.profile1, self.profile2)
 
     def test_chat_view_template(self):
         response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
