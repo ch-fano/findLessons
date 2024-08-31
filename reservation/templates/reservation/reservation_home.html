@@ -13,33 +13,34 @@
             display: flex;
             flex-direction: column;
         }
+
         .main-content {
             display: flex;
             flex-direction: column;
             flex: 1;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            align-items: center;
         }
 
         .teachers-list-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            margin: 15px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 1100px;
+            margin: 20px auto;
         }
 
         .teachers-list {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            margin: 0 auto;
-            max-width: 1200px;
-            padding: 0 15px;
             justify-content: center;
         }
+
          .teachers-list-container h2{
              margin: 15px;
+             text-align: left;
          }
         .teacher-container {
             display: flex;
@@ -183,7 +184,7 @@
                 <h2>Teacher found:</h2>
                 <div class="teachers-list">
                     {% for teacher in teachers %}
-                        <div class="teacher-container" data-rating="{{ teacher.stars }}" onclick="location.href='{% url 'user_profile:view-profile' teacher.profile.id%}'">
+                        <div class="teacher-container" data-rating="{{ teacher.stars }}" onclick="location.href='{% url 'user_profile:view-profile' teacher.profile.id%}?source=reservation'">
                             <div class="teacher-picture">
                                 <img src="{{ teacher.profile.picture.url }}" alt="{{ teacher.profile.first_name }} {{ teacher.profile.last_name }}">
                             </div>
