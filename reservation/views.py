@@ -28,7 +28,7 @@ def get_filtered_list(request, subject, city):
         'title': 'Search teacher'
     }
 
-    queryset = Teacher.objects.filter(subjects__icontains=subject, city__iexact=city)
+    queryset = Teacher.objects.filter(subjects__icontains=subject, city__iexact=city).order_by('price', '-stars')
 
     if request.method == 'POST':
 
