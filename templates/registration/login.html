@@ -88,7 +88,7 @@
     <input type="button" value="← Back" onClick="history.go(-1);" class="btn-custom back-button">
     {% if user.is_authenticated %}
         <div class="full-page-container">
-            <h1> Already logged in !!!</h1>
+            <h1> Access denied!!!</h1>
             <img src="{% static 'imgs/access_denied.png' %}" alt="Access Denied Image">
         </div>
     {% else %}

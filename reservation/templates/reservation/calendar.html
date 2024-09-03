@@ -215,7 +215,7 @@
     {% else %}
         <form id="login-form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
-            <a href="{% url 'login' %}" class="login">
+            <a href="{% url 'login' %}" class="login align-link-profile">
                 Log in
             </a>
         </form>
