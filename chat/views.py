@@ -1,3 +1,4 @@
+from django.dispatch import receiver
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
@@ -12,11 +13,13 @@ def get_chats_dicts(profile):
         new_msg = chat.has_new_messages(profile)
 
         if chat.visibility.get(participant=profile).visible or new_msg:
-            chats.append(
-                {'id': chat.pk,
-                'other_participant': chat.get_other_participant(profile),
-                'new_messages': new_msg,}
-            )
+            other_participant = chat.get_other_participant(profile)
+            if other_participant:
+                chats.append(
+                    {'id': chat.pk,
+                    'other_participant': other_participant,
+                    'new_messages': new_msg,}
+                )
     return chats
 
 @login_required
@@ -39,23 +42,25 @@ def start_chat(request, dest_pk):
 @login_required
 def chat_view(request, pk):
     current_chat = get_object_or_404(Chat, pk=pk)
+    chat_receiver = current_chat.get_other_participant(request.user.profile)
 
     if request.user.profile not in current_chat.participants.all():
         return HttpResponseForbidden('You can only access to your chat')
 
-    # Prevent accessing "deleted" chat via url
-    if not current_chat.visibility.get(participant=request.user.profile).visible:
+    # Prevent accessing "deleted" chat via url and chats without a receiver
+    if not current_chat.visibility.get(participant=request.user.profile).visible or chat_receiver is None:
         return redirect('chat:chat-home')
 
     current_chat.read_messages(request.user.profile)
 
     ctx = {
-        'receiver': current_chat.get_other_participant(request.user.profile),
+        'receiver': chat_receiver,
         'messages': current_chat.messages.all(),
         'chat_name': current_chat.chat_name(),
         'chats': get_chats_dicts(request.user.profile),
         'current_chat_id': current_chat.pk,
     }
+
     return render(request, 'chat/chat.html', ctx)
 
 @login_required

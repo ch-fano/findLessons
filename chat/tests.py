@@ -1,8 +1,10 @@
+from django.templatetags.static import static
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from user_profile.models import Profile
 from .models import Chat, Message, Visibility
+import re
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -124,11 +126,88 @@ class ChatTemplateTestCase(BaseTestCase):
         response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
         self.assertTemplateUsed(response, 'chat/chat.html')
 
+        # Check for receiver username and chat name in the template
         self.assertContains(response, self.profile2.user.username)
         self.assertContains(response, self.chat.chat_name())
         self.assertContains(response, 'Send')
 
-        # Verify chat messages are displayed
+        # Verify that chat messages are displayed
         message = Message.objects.create(chat=self.chat, sender=self.profile2, content="Test Message")
         response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
         self.assertContains(response, message.content)
+
+    def test_chat_list_rendering(self):
+        # Test that the chat list renders correctly with the user's chats
+        chat2 = Chat.objects.create()
+        chat2.participants.add(self.profile1)
+        chat2.participants.add(User.objects.create_user(username='user3', password='password').profile)
+
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+        self.assertContains(response, self.profile2.user.username)
+        self.assertNotContains(response, 'No chats available')
+
+        # Test for an empty chat list scenario
+        Chat.objects.filter(participants=self.profile1).delete()
+        response = self.client.get(reverse('chat:chat-home'))
+        self.assertContains(response, 'No chats available')
+
+    def test_message_input_visibility(self):
+        # Test that the message input box and send button are visible when a receiver is present
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+        self.assertContains(response, '<textarea id="chat-message-input" type="text"></textarea>', html=True)
+        self.assertContains(response, '<button id="chat-message-submit">Send</button>', html=True)
+
+    def test_no_receiver(self):
+        # Test that the input and button do not appear if no receiver is set
+        chat_with_no_receiver = Chat.objects.create()
+        chat_with_no_receiver.participants.add(self.profile1)
+
+        # Initial request to check if it redirects
+        response = self.client.get(reverse('chat:chat-view', args=[chat_with_no_receiver.pk]))
+
+        # Ensure it was redirected
+        self.assertEqual(response.status_code, 302)
+
+        # Follow the redirect to the final page
+        follow_response = self.client.get(response['Location'], follow=True)
+
+        # Ensure the final status code after following the redirect is 200
+        self.assertEqual(follow_response.status_code, 200)
+
+        # Check that the input and button do not appear on the final page
+        self.assertNotContains(follow_response, '<textarea id="chat-message-input" type="text"></textarea>', html=True)
+        self.assertNotContains(follow_response, '<button id="chat-message-submit">Send</button>', html=True)
+
+    def test_chat_delete_link(self):
+        # Test that the delete button is displayed and links correctly
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+        delete_url = reverse('chat:chat-delete', args=[self.chat.pk])
+        delete_img_path = static('imgs/delete.png')
+        self.assertContains(response, f'<a href="{delete_url}"><img src="{delete_img_path}" class="delete-img" alt="Delete"></a>', html=True)
+
+    def test_receiver_profile_link(self):
+        # Test that the receiver's profile link is correct
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+
+        profile_url = reverse('user_profile:view-profile', args=[self.profile2.pk]) + "?source=chat"
+        pattern = re.compile(r'href="{}"'.format(re.escape(profile_url)))
+
+        self.assertTrue(pattern.search(response.content.decode('utf-8')))
+
+    def test_message_display(self):
+        # Test that messages are displayed with the correct class based on the sender
+        message1 = Message.objects.create(chat=self.chat, sender=self.profile1, content="Message from user1")
+        message2 = Message.objects.create(chat=self.chat, sender=self.profile2, content="Message from user2")
+
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+        self.assertContains(response, 'message-box sent')
+        self.assertContains(response, 'message-box received')
+        self.assertContains(response, message1.content)
+        self.assertContains(response, message2.content)
+
+    def test_websocket_setup(self):
+        # Test that the WebSocket setup script is included in the response
+        response = self.client.get(reverse('chat:chat-view', args=[self.chat.pk]))
+        self.assertContains(response, "const chatName =")
+        self.assertContains(response, "const username =")
+        self.assertContains(response, "setupWebSocket()")
