@@ -166,7 +166,7 @@ class AvailabilityCreateView(GroupRequiredMixin, CreateView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher.pk})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -197,7 +197,7 @@ class AvailabilityUpdateView(GroupRequiredMixin, UpdateView):
     def get_success_url(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         teacher = get_object_or_404(Teacher, profile=profile)
-        return reverse_lazy('availability-list', kwargs={'teacher_id': teacher.pk})
+        return reverse_lazy('reservation:availability-list', kwargs={'teacher_id': teacher.pk})
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
