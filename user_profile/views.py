@@ -121,7 +121,7 @@ class TeacherUpdateView(GroupRequiredMixin, UpdateView):
 
 
 def get_notifications(request):
-    notifications = request.user.profile.notifications.all()
+    notifications = request.user.profile.notifications.all().order_by('-timestamp')
     for n in notifications:
         n.read = True
         n.save()

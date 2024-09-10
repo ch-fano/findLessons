@@ -36,6 +36,10 @@ def start_chat(request, dest_pk):
         chat = Chat.objects.create()
         chat.participants.add(sender, receiver)
         chat.save()
+    else:
+        chat_visibility  = sender.visibility.filter(chat=chat).first()
+        chat_visibility.visible = True
+        chat_visibility.save()
 
     return redirect('chat:chat-view', pk=chat.pk)
 
